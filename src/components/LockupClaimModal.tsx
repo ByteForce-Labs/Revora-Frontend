@@ -1,14 +1,23 @@
-import React, { useEffect, useId, useRef, useState } from 'react';
-import { AlertTriangle, ChevronRight, Info, Sparkles, X } from 'lucide-react';
+import React, { useCallback, useEffect, useId, useRef, useState } from 'react';
+import { AlertTriangle, ChevronRight, ExternalLink, Info, Sparkles, X } from 'lucide-react';
 import { Button } from './Button';
 
-interface LockupClaimModalProps {
+export interface LockupClaimResult {
+  hash?: string;
+}
+
+export interface LockupClaimModalProps {
   isOpen: boolean;
   onClose: () => void;
   unlockedAmount?: string;
   gasEstimate?: number;
   initialAutoClaim?: boolean;
+  onClaim?: (options: { autoClaim: boolean }) => Promise<LockupClaimResult | void>;
+  explorerBaseUrl?: string;
 }
+
+const FOCUSABLE_SELECTOR =
+  'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 export const LockupClaimModal: React.FC<LockupClaimModalProps> = ({
   isOpen,
@@ -16,32 +25,57 @@ export const LockupClaimModal: React.FC<LockupClaimModalProps> = ({
   unlockedAmount = '$12,480.00',
   gasEstimate = 22,
   initialAutoClaim = false,
+  onClaim,
+  explorerBaseUrl = 'https://stellar.expert/explorer/public/tx/',
 }) => {
   const dialogRef = useRef<HTMLDivElement>(null);
+  const openerRef = useRef<HTMLElement | null>(null);
+  const inFlightRef = useRef(false);
   const titleId = useId();
   const descriptionId = useId();
   const [autoClaim, setAutoClaim] = useState(initialAutoClaim);
-  const [claimState, setClaimState] = useState<'idle' | 'success' | 'later' | 'warning' | 'error'>('idle');
+  const [claimState, setClaimState] = useState<
+    'idle' | 'pending' | 'confirmed' | 'later' | 'warning' | 'error'
+  >('idle');
   const [statusMessage, setStatusMessage] = useState('');
+  const [txHash, setTxHash] = useState<string | null>(null);
+  const [highGasConfirmed, setHighGasConfirmed] = useState(false);
   const [showAutoClaimInfo, setShowAutoClaimInfo] = useState(false);
+
+  const restoreFocus = useCallback(() => {
+    const opener = openerRef.current;
+    if (opener && typeof opener.focus === 'function' && document.contains(opener)) {
+      opener.focus();
+    }
+  }, []);
+
+  const handleClose = useCallback(() => {
+    onClose();
+    restoreFocus();
+  }, [onClose, restoreFocus]);
 
   useEffect(() => {
     if (!isOpen) {
       setAutoClaim(initialAutoClaim);
       setClaimState('idle');
       setStatusMessage('');
+      setTxHash(null);
+      setHighGasConfirmed(false);
+      inFlightRef.current = false;
       return;
     }
 
-    const activeElement = document.activeElement as HTMLElement | null;
+    const activeElement = document.activeElement;
+    openerRef.current = activeElement instanceof HTMLElement ? activeElement : null;
+
     if (dialogRef.current) {
       dialogRef.current.focus();
     }
 
-    if (activeElement && activeElement instanceof HTMLElement) {
-      activeElement.blur();
-    }
-  }, [isOpen, initialAutoClaim]);
+    return () => {
+      restoreFocus();
+    };
+  }, [isOpen, initialAutoClaim, restoreFocus]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -49,44 +83,108 @@ export const LockupClaimModal: React.FC<LockupClaimModalProps> = ({
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         event.preventDefault();
-        onClose();
+        handleClose();
+        return;
+      }
+
+      if (event.key === 'Tab' && dialogRef.current) {
+        const focusable = Array.from(
+          dialogRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR),
+        ).filter(
+          (el) => !el.hasAttribute('disabled') && el.getAttribute('aria-disabled') !== 'true',
+        );
+
+        if (focusable.length === 0) {
+          event.preventDefault();
+          dialogRef.current.focus();
+          return;
+        }
+
+        const active = document.activeElement as HTMLElement | null;
+        const currentIndex = active ? focusable.indexOf(active) : -1;
+
+        if (event.shiftKey) {
+          if (currentIndex <= 0) {
+            event.preventDefault();
+            focusable[focusable.length - 1].focus();
+          }
+        } else if (currentIndex === -1 || currentIndex === focusable.length - 1) {
+          event.preventDefault();
+          focusable[0].focus();
+        }
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
+  }, [isOpen, handleClose]);
 
   if (!isOpen) return null;
 
-  const handleClaimNow = () => {
+  const handleClaimNow = async () => {
+    if (inFlightRef.current || claimState === 'pending') {
+      return;
+    }
+
     if (!unlockedAmount || unlockedAmount === '$0.00') {
       setClaimState('error');
       setStatusMessage('Nothing is currently available to claim.');
       return;
     }
 
-    if (gasEstimate >= 80) {
+    if (gasEstimate >= 80 && !highGasConfirmed) {
+      setHighGasConfirmed(true);
       setClaimState('warning');
-      setStatusMessage('High gas fees may reduce your expected proceeds. Consider waiting or using auto-claim.');
+      setStatusMessage(
+        'High gas fees may reduce your expected proceeds. Consider waiting or using auto-claim.',
+      );
       return;
     }
 
-    setClaimState('success');
-    setStatusMessage('Claim request queued. We will keep you updated as it confirms.');
+    inFlightRef.current = true;
+    setClaimState('pending');
+    setStatusMessage('Submitting claim request…');
+    setTxHash(null);
+
+    try {
+      const result = await (onClaim ? onClaim({ autoClaim }) : Promise.resolve({}));
+      const resolvedHash =
+        result && typeof result === 'object' && typeof result.hash === 'string' && result.hash.trim()
+          ? result.hash.trim()
+          : null;
+      setTxHash(resolvedHash);
+      setClaimState('confirmed');
+      setStatusMessage('Claim request queued. We will keep you updated as it confirms.');
+    } catch (error) {
+      setClaimState('error');
+      setStatusMessage(
+        error instanceof Error && error.message
+          ? error.message
+          : 'Unable to submit claim request. Please try again.',
+      );
+    } finally {
+      inFlightRef.current = false;
+    }
   };
 
   const handleClaimLater = () => {
+    if (inFlightRef.current || claimState === 'pending') {
+      return;
+    }
+    setHighGasConfirmed(false);
+    setTxHash(null);
     setClaimState('later');
     setStatusMessage('We will remind you again at a better time to claim this unlock.');
   };
 
+  const isPending = claimState === 'pending';
   const gasLabel = gasEstimate >= 80 ? 'High' : gasEstimate >= 50 ? 'Moderate' : 'Low';
+  const explorerUrl = txHash ? `${explorerBaseUrl}${encodeURIComponent(txHash)}` : null;
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 px-4 py-6"
-      onClick={onClose}
+      onClick={handleClose}
       role="presentation"
     >
       <div
@@ -109,7 +207,7 @@ export const LockupClaimModal: React.FC<LockupClaimModalProps> = ({
           </div>
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             className="rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800"
             aria-label="Close claim modal"
           >
@@ -199,16 +297,45 @@ export const LockupClaimModal: React.FC<LockupClaimModalProps> = ({
 
         {claimState !== 'idle' && claimState !== 'warning' && claimState !== 'error' && (
           <div role="status" className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
-            {statusMessage}
+            <p>{statusMessage}</p>
+            {txHash && explorerUrl && (
+              <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+                <span>Transaction hash:</span>
+                <code className="rounded bg-emerald-100 px-1.5 py-0.5 font-mono text-emerald-900">
+                  {txHash}
+                </code>
+                <a
+                  href={explorerUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 font-semibold text-emerald-800 underline hover:text-emerald-950"
+                >
+                  View on explorer
+                  <ExternalLink size={12} aria-hidden="true" />
+                </a>
+              </div>
+            )}
           </div>
         )}
 
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
-          <Button type="button" variant="secondary" onClick={handleClaimLater} className="w-full sm:w-auto">
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={handleClaimLater}
+            disabled={isPending}
+            className="w-full sm:w-auto"
+          >
             Claim later
           </Button>
-          <Button type="button" onClick={handleClaimNow} className="w-full sm:w-auto">
-            Claim now
+          <Button
+            type="button"
+            onClick={handleClaimNow}
+            loading={isPending}
+            disabled={isPending}
+            className="w-full sm:w-auto"
+          >
+            {claimState === 'warning' ? 'Claim anyway' : 'Claim now'}
             <ChevronRight size={16} className="ml-2 inline" aria-hidden="true" />
           </Button>
         </div>
