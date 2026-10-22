@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { Button } from './Button';
 import { FormError } from './FormError';
+import { RegenerateCodesDialog } from './RegenerateCodesDialog';
 import { WizardStepper, type WizardStep } from './WizardStepper';
 import { verifyTotpCode, type VerifyTwoFactorCode } from './twoFactorVerification';
 import QRCode from 'qrcode';
@@ -44,6 +45,12 @@ interface TwoFactorSetupProps {
    * RFC 6238. SMS verification requires callers to provide this handler.
    */
   verifyCode?: VerifyTwoFactorCode;
+  /**
+   * Rotates the recovery codes server-side and resolves with the new set.
+   * The previous codes are invalidated by the backend. When omitted, the
+   * Regenerate action is hidden.
+   */
+  onRegenerateCodes?: () => Promise<string[]>;
 }
 
 // ─── Standalone fallback data ─────────────────────────────────────────────────
@@ -438,6 +445,7 @@ const Step3: React.FC<Step3Props> = ({ method, secret, verifyCode, onNext, onBac
 
 interface Step4Props {
   codes: string[];
+  onRegenerateCodes?: () => Promise<string[]>;
   onNext: () => void;
   onBack: () => void;
 }
@@ -446,13 +454,25 @@ interface Step4Props {
 const CODE_PLACEHOLDER = '••••••';
 const CODES_PER_ROW = 5;
 
-const Step4: React.FC<Step4Props> = ({ codes, onNext, onBack }) => {
+const Step4: React.FC<Step4Props> = ({ codes: initialCodes, onRegenerateCodes, onNext, onBack }) => {
+  const [codes, setCodes] = useState<string[]>(initialCodes);
   const [acknowledged, setAcknowledged] = useState(false);
   const [revealed, setRevealed] = useState<boolean[]>(() => new Array(codes.length).fill(false));
   const [allRevealed, setAllRevealed] = useState(false);
   const [showRegenerateConfirm, setShowRegenerateConfirm] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
+  const [isRegenerating, setIsRegenerating] = useState(false);
+  const [regenerateError, setRegenerateError] = useState<string | null>(null);
   const codesGridRef = useRef<HTMLDivElement>(null);
+  const regenerateTriggerRef = useRef<HTMLButtonElement>(null);
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   // Handle reveal toggle for individual codes
   const toggleReveal = useCallback((index: number) => {
@@ -649,14 +669,36 @@ const Step4: React.FC<Step4Props> = ({ codes, onNext, onBack }) => {
     setShowRegenerateConfirm(true);
   };
 
-  const confirmRegenerate = () => {
-    // Recovery-code rotation is owned by the caller/backend; the confirmation
-    // remains a UX boundary until that operation is supplied to this component.
+  const closeRegenerateDialog = useCallback(() => {
     setShowRegenerateConfirm(false);
+    setRegenerateError(null);
+    regenerateTriggerRef.current?.focus();
+  }, []);
+
+  const confirmRegenerate = async () => {
+    if (!onRegenerateCodes || isRegenerating) return;
+    setIsRegenerating(true);
+    setRegenerateError(null);
+    try {
+      const newCodes = await onRegenerateCodes();
+      if (!isMountedRef.current) return;
+      setCodes(newCodes);
+      setRevealed(new Array(newCodes.length).fill(false));
+      setAllRevealed(false);
+      setIsCopied(false);
+      setAcknowledged(false);
+      setIsRegenerating(false);
+      closeRegenerateDialog();
+    } catch {
+      if (!isMountedRef.current) return;
+      setIsRegenerating(false);
+      setRegenerateError('Could not regenerate recovery codes. Your existing codes are unchanged. Please try again.');
+    }
   };
 
   const cancelRegenerate = () => {
-    setShowRegenerateConfirm(false);
+    if (isRegenerating) return;
+    closeRegenerateDialog();
   };
 
   // Count of revealed codes for status indicators
@@ -747,14 +789,17 @@ const Step4: React.FC<Step4Props> = ({ codes, onNext, onBack }) => {
               <Printer size={16} className="mr-1" aria-hidden="true" /> Print
             </button>
 
-            <button
-              type="button"
-              onClick={handleRegenerate}
-              className="btn-secondary text-sm text-error hover:bg-error/10"
-              aria-label="Regenerate recovery codes"
-            >
-              <RotateCcw size={16} className="mr-1" aria-hidden="true" /> Regenerate
-            </button>
+            {onRegenerateCodes && (
+              <button
+                ref={regenerateTriggerRef}
+                type="button"
+                onClick={handleRegenerate}
+                className="btn-secondary text-sm text-error hover:bg-error/10"
+                aria-label="Regenerate recovery codes"
+              >
+                <RotateCcw size={16} className="mr-1" aria-hidden="true" /> Regenerate
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -845,37 +890,13 @@ const Step4: React.FC<Step4Props> = ({ codes, onNext, onBack }) => {
       </div>
 
       {/* Regenerate Confirmation Modal */}
-      {showRegenerateConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-glass-bg rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-lg font-semibold mb-4">Regenerate Recovery Codes</h3>
-            <div className="tfa-warning-banner mb-4" role="alert">
-              <p className="text-sm">
-                <strong>⚠️ Warning:</strong> This will invalidate your current recovery codes and generate a new set of 10 codes.
-                Any existing recovery codes will no longer work.
-              </p>
-              <p className="text-xs mt-2">
-                Make sure you've saved the current codes before proceeding!
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={cancelRegenerate}
-                className="btn-secondary flex-1"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={confirmRegenerate}
-                className="bg-error text-white px-4 py-2 rounded-lg hover:bg-error/90 transition-colors"
-              >
-                Regenerate Codes
-              </button>
-            </div>
-          </div>
-        </div>
+      {onRegenerateCodes && showRegenerateConfirm && (
+        <RegenerateCodesDialog
+          isPending={isRegenerating}
+          error={regenerateError}
+          onConfirm={confirmRegenerate}
+          onCancel={cancelRegenerate}
+        />
       )}
 
       {/* Screen reader announcements */}
@@ -937,6 +958,7 @@ export const TwoFactorSetup: React.FC<TwoFactorSetupProps> = ({
   totpSecret = DEFAULT_SECRET,
   recoveryCodes = DEFAULT_RECOVERY_CODES,
   verifyCode = verifyCodeLocally,
+  onRegenerateCodes,
 }) => {
   const [step, setStep] = useState<Step>(1);
   const [method, setMethod] = useState<Method>('totp');
@@ -989,7 +1011,14 @@ export const TwoFactorSetup: React.FC<TwoFactorSetupProps> = ({
           onBack={back}
         />
       )}
-      {step === 4 && <Step4 codes={recoveryCodes} onNext={next} onBack={back} />}
+      {step === 4 && (
+        <Step4
+          codes={recoveryCodes}
+          onRegenerateCodes={onRegenerateCodes}
+          onNext={next}
+          onBack={back}
+        />
+      )}
       {step === 5 && <Step5 onComplete={onComplete} />}
 
       {step < 5 && (

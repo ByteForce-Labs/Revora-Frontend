@@ -24,6 +24,7 @@ const renderSetup = () => {
       totpSecret={TEST_SECRET}
       recoveryCodes={TEST_CODES}
       verifyCode={verifyCode}
+      onRegenerateCodes={async () => TEST_CODES}
     />
   );
 };
