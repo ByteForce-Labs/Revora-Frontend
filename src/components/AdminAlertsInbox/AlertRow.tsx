@@ -89,9 +89,9 @@ export const AlertRow: React.FC<AlertRowProps> = ({
       {/* Main Content */}
       <div className="flex-grow min-w-0 flex flex-col gap-1">
         <div className="flex items-center gap-2 flex-wrap">
-          <h3 className="font-semibold text-white truncate max-w-full" title={alert.title}>
+          <h2 className="font-semibold text-white truncate max-w-full" title={alert.title}>
             {alert.title}
-          </h3>
+          </h2>
           {getStatusBadge()}
         </div>
         <p className="text-sm text-gray-400 line-clamp-1" title={alert.description}>

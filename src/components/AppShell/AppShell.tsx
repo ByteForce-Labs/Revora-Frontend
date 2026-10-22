@@ -15,7 +15,7 @@ import {
 } from '../NetworkSwitcher';
 import { ErrorRecoveryPanel } from '../ErrorRecoveryPanel';
 import { useErrorSnapshots } from '../../hooks/useErrorSnapshots';
-import { RedemptionBanner, RedemptionStatus } from '../RedemptionBanner';
+import { RedemptionBanner, type RedemptionStatus } from '../RedemptionBanner/index';
 
 interface AppShellProps {
   children: React.ReactNode;

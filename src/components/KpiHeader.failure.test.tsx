@@ -128,7 +128,8 @@ describe("KpiHeader — numeric boundaries for the neighbouring path (#736)", ()
   it("renders a large negative return with the minus sign", () => {
     render(<KpiHeader {...BASE} totalReturn={-987.65} />);
 
-    expect(screen.getAllByText("-987.7%").length).toBeGreaterThan(0);
+    // (-987.65).toFixed(1) === "-987.6" because -987.65 is stored as -987.6499…
+    expect(screen.getAllByText("-987.6%").length).toBeGreaterThan(0);
     expect(screen.getAllByLabelText(/Decrease of 987.65%/).length).toBeGreaterThan(0);
   });
 

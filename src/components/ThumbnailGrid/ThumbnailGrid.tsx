@@ -13,6 +13,7 @@ import {
   ChevronRight,
   GripVertical,
   FileType,
+  type LucideIcon,
 } from 'lucide-react';
 import './ThumbnailGrid.css';
 
@@ -36,7 +37,7 @@ export interface ThumbnailGridProps {
 
 /* ─── File-type icon map ──────────────────────────────────── */
 
-const FILE_TYPE_ICONS: Record<string, React.FC<{ size?: number; className?: string }>> = {
+const FILE_TYPE_ICONS: Record<string, LucideIcon> = {
   image: FileImage,
   video: Film,
   pdf: FileText,

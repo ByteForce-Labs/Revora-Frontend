@@ -8,7 +8,7 @@ expect.extend(toHaveNoViolations);
 
 describe('AdminAlertsInbox', () => {
   beforeEach(() => {
-    vi.useFakeTimers();
+    vi.useFakeTimers({ shouldAdvanceTime: true });
   });
 
   afterEach(() => {

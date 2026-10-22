@@ -52,15 +52,18 @@ describe('RevenuePayoutChart', () => {
     
     fireEvent.mouseEnter(firstBar);
     
-    // Tooltip should appear containing the period text
-    expect(screen.getByText('Jan')).toBeInTheDocument();
+    // Tooltip should appear containing the period text (in addition to the x-axis label)
+    expect(screen.getAllByText('Jan')).toHaveLength(2);
     expect(screen.getByText(/80,000/i)).toBeInTheDocument();
     
     fireEvent.mouseLeave(firstBar);
-    expect(screen.queryByText('Jan')).not.toBeInTheDocument();
+    expect(screen.getAllByText('Jan')).toHaveLength(1);
   });
 
   it('exports CSV on button click', () => {
+    render(<RevenuePayoutChart data={mockData} />);
+
+    // Install the DOM spies only after rendering: render() itself appends to document.body.
     const createElementSpy = vi.spyOn(document, 'createElement');
     const appendChildSpy = vi.spyOn(document.body, 'appendChild').mockImplementation(() => {
       return document.body;
@@ -69,8 +72,6 @@ describe('RevenuePayoutChart', () => {
       return document.body;
     });
 
-    render(<RevenuePayoutChart data={mockData} />);
-    
     const exportBtn = screen.getByTestId('export-csv-btn');
     fireEvent.click(exportBtn);
     

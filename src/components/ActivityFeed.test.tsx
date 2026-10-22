@@ -314,7 +314,10 @@ describe('ActivityFeed – accessibility', () => {
     await waitForFeed();
     // The <li role="article"> elements in the feed have aria-label
     const feed = screen.getByRole('feed');
-    const articles = within(feed).getAllByRole('article');
+    const articles = within(feed)
+      .getAllByRole('article')
+      .filter(a => a.classList.contains('activity-feed__event'));
+    expect(articles.length).toBeGreaterThan(0);
     articles.forEach(a => {
       expect(a).toHaveAttribute('aria-label');
     });

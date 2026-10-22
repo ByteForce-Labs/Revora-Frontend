@@ -106,7 +106,7 @@ export function RevenueReportForm() {
     [grossRevenue, locale]
   );
   const revenueError = !parseResult.ok;
-  const revenueCents = parseResult.ok ? parseResult.cents : 0;
+  const revenueCents = parseResult.ok ? parseResult.cents ?? 0 : 0;
   const payoutEstimateCents = useMemo(
     () => (revenueError ? 0 : computePayoutEstimateCents(revenueCents)),
     [revenueError, revenueCents]
@@ -185,9 +185,9 @@ export function RevenueReportForm() {
       if (exportFormat === "csv") {
         blob = new Blob([toCsv(rows)], { type: REPORT_EXPORT_MIME_TYPES.csv });
       } else if (exportFormat === "xlsx") {
-        blob = new Blob([toXlsxBytes(rows)], { type: REPORT_EXPORT_MIME_TYPES.xlsx });
+        blob = new Blob([toXlsxBytes(rows) as BlobPart], { type: REPORT_EXPORT_MIME_TYPES.xlsx });
       } else {
-        blob = new Blob([toPdfBytes(rows)], { type: REPORT_EXPORT_MIME_TYPES.pdf });
+        blob = new Blob([toPdfBytes(rows) as BlobPart], { type: REPORT_EXPORT_MIME_TYPES.pdf });
       }
 
       downloadBlob(blob, fileName);

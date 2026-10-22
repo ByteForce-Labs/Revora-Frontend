@@ -4,6 +4,12 @@ import { Alert } from '../components/AdminAlertsInbox/types';
 import { mockAlerts } from '../components/AdminAlertsInbox/alertsData';
 import { Bell } from 'lucide-react';
 
+const ACTION_PAST_TENSE: Record<'acknowledge' | 'assign' | 'resolve', string> = {
+  acknowledge: 'acknowledged',
+  assign: 'assigned',
+  resolve: 'resolved',
+};
+
 export const AdminAlertsInbox: React.FC = () => {
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [loading, setLoading] = useState(true);
@@ -37,7 +43,7 @@ export const AdminAlertsInbox: React.FC = () => {
       return alert;
     }));
 
-    showUndoToast(`Alert marked as ${action}d`);
+    showUndoToast(`Alert marked as ${ACTION_PAST_TENSE[action]}`);
   };
 
   const handleBulkAction = (ids: string[], action: 'acknowledge' | 'assign' | 'resolve') => {
@@ -54,7 +60,7 @@ export const AdminAlertsInbox: React.FC = () => {
       return alert;
     }));
 
-    showUndoToast(`${ids.length} alerts marked as ${action}d`);
+    showUndoToast(`${ids.length} alerts marked as ${ACTION_PAST_TENSE[action]}`);
   };
 
   const saveForUndo = () => {

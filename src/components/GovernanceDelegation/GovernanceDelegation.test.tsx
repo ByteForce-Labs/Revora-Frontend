@@ -9,8 +9,12 @@ expect.extend(toHaveNoViolations);
 describe('GovernanceDelegation', () => {
   // Polyfill for dialog methods in jsdom
   beforeAll(() => {
-    HTMLDialogElement.prototype.showModal = jest.fn();
-    HTMLDialogElement.prototype.close = jest.fn();
+    HTMLDialogElement.prototype.showModal = vi.fn(function (this: HTMLDialogElement) {
+      this.setAttribute('open', '');
+    });
+    HTMLDialogElement.prototype.close = vi.fn(function (this: HTMLDialogElement) {
+      this.removeAttribute('open');
+    });
   });
 
   it('renders without crashing and has no accessibility violations', async () => {
@@ -66,7 +70,7 @@ describe('GovernanceDelegation', () => {
     fireEvent.click(revokeButton);
 
     // Dialog should open
-    expect(screen.getByText('Revoke Delegation')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Revoke Delegation' })).toBeInTheDocument();
 
     // Confirm revoke
     const confirmRevokeButton = screen.getByRole('button', { name: 'Revoke' });

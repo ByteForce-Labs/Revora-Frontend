@@ -147,7 +147,7 @@ export const LockupClaimModal: React.FC<LockupClaimModalProps> = ({
     setTxHash(null);
 
     try {
-      const result = await (onClaim ? onClaim({ autoClaim }) : Promise.resolve({}));
+      const result: LockupClaimResult | void = await (onClaim ? onClaim({ autoClaim }) : Promise.resolve({}));
       const resolvedHash =
         result && typeof result === 'object' && typeof result.hash === 'string' && result.hash.trim()
           ? result.hash.trim()

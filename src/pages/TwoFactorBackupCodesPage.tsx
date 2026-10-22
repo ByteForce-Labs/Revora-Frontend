@@ -24,7 +24,9 @@ const DEFAULT_CODES = [
 
 const CODE_PLACEHOLDER = '••••••';
 
-interface TwoFactorBackupCodesPageProps {
+export interface TwoFactorBackupCodesPageProps {
+  initialCodes?: string[];
+  codes?: string[];
   /**
    * Rotates the recovery codes server-side and resolves with the new set.
    * When omitted, the Regenerate action is hidden.
@@ -32,15 +34,21 @@ interface TwoFactorBackupCodesPageProps {
   onRegenerateCodes?: () => Promise<string[]>;
 }
 
-const TwoFactorBackupCodesPage: React.FC<TwoFactorBackupCodesPageProps> = ({ onRegenerateCodes }) => {
-  const [codes, setCodes] = useState(CODES);
-  const [revealed, setRevealed] = useState<boolean[]>(() => new Array(CODES.length).fill(false));
+const TwoFactorBackupCodesPage: React.FC<TwoFactorBackupCodesPageProps> = ({
+  initialCodes,
+  codes: propCodes,
+  onRegenerateCodes,
+}) => {
+  const [codes, setCodes] = useState<string[]>(() => propCodes ?? initialCodes ?? DEFAULT_CODES);
+  const [revealed, setRevealed] = useState<boolean[]>(() => new Array(codes.length).fill(false));
   const [allRevealed, setAllRevealed] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
+  const [copyError, setCopyError] = useState<string | null>(null);
   const [showRegenerateConfirm, setShowRegenerateConfirm] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [regenerateError, setRegenerateError] = useState<string | null>(null);
   const codesGridRef = useRef<HTMLDivElement>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const regenerateTriggerRef = useRef<HTMLButtonElement>(null);
   const isMountedRef = useRef(true);
 
@@ -48,6 +56,9 @@ const TwoFactorBackupCodesPage: React.FC<TwoFactorBackupCodesPageProps> = ({ onR
     isMountedRef.current = true;
     return () => {
       isMountedRef.current = false;
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
     };
   }, []);
 

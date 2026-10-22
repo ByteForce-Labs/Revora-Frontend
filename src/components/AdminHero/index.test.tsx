@@ -123,7 +123,7 @@ describe('AdminHero barrel — AdminHero rendering through the barrel', () => {
   it('renders the section, heading, tiles and drill-down links', () => {
     renderWithRouter(<AdminHero {...HERO_PROPS} />);
 
-    const section = screen.getByTestId('admin-hero');
+    const section = screen.getByRole('region', { name: 'Admin Dashboard' });
     expect(section).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Admin Dashboard' })).toBeInTheDocument();
     expect(screen.getByRole('list', { name: 'System health tiles' })).toBeInTheDocument();

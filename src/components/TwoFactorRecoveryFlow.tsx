@@ -203,7 +203,7 @@ const VerifyCodeStep: React.FC<VerifyCodeStepProps> = (stepProps) => {
   const [cooldown, setCooldown] = useState(COOLOWN_SECONDS);
   const [attempts, setAttempts] = useState(0);
   const [lockedUntil, setLockedUntil] = useState<number>(0);
-  const [lockountRemaining, setLockoutRemaining] = useState(0);
+  const [lockoutRemaining, setLockoutRemaining] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const mountedRef = useRef(true);
 

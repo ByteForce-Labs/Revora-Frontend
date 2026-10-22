@@ -256,7 +256,7 @@ function CameraActiveView({
     <div className="kdc-camera-active" data-testid="camera-active">
       <div className="kdc-video-wrap">
         <video
-          ref={videoRef}
+          ref={videoRef as React.RefObject<HTMLVideoElement>}
           autoPlay
           playsInline
           muted

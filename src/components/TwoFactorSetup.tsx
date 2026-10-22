@@ -191,7 +191,7 @@ interface Step2Props {
   onBack: () => void;
 }
 
-const Step2: React.FC<Step2Props> = ({ method, secret, onNext, onBack }) => {
+const Step2: React.FC<Step2Props> = ({ method, secret, accountLabel, onNext, onBack }) => {
   const [showManual, setShowManual] = useState(false);
   const [copied, setCopied] = useState(false);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);

@@ -26,7 +26,7 @@ describe('SaveAsDraft Component', () => {
     expect(screen.getByText(/Saving.../i)).toBeInTheDocument();
     
     // Fast forward enough for promise resolution and state updates
-    await vi.runAllTimersAsync();
+    await vi.advanceTimersByTimeAsync(0);
     
     expect(screen.getByText(/Draft saved/i)).toBeInTheDocument();
     expect(screen.queryByText(/Saving.../i)).not.toBeInTheDocument();

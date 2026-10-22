@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { AlertTriangle, Info, X, ShieldAlert } from 'lucide-react';
+import { AlertTriangle, Info, X, ShieldAlert, type LucideIcon } from 'lucide-react';
 import { StatusGlyph, HealthStatus } from './StatusGlyph';
 import './AdminHero.css';
 
@@ -31,7 +31,7 @@ export interface AdminHeroProps {
 }
 
 const SEVERITY_CONFIG: Record<IncidentSeverity, {
-  icon: React.FC<{ size?: number; className?: string; 'aria-hidden'?: string }>;
+  icon: LucideIcon;
   bgClass: string;
   borderClass: string;
   textClass: string;

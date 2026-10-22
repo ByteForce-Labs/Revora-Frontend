@@ -1,73 +1,91 @@
 import { describe, it, expect } from 'vitest';
 
-import * as KycDocumentCaptureIndex from './index';
+import * as RoleDashboardIndex from './index';
 
-describe('KycDocumentCapture Public API', () => {
-  it('exposes the KycDocumentCapture component', () => {
-    expect(KycDocumentCaptureIndex.KycDocumentCapture).toBeDefined();
-    expect(typeof KycDocumentCaptureIndex.KycDocumentCapture).toBe('function');
+describe('RoleDashboard Public API', () => {
+  it('exposes the RoleDashboard component', () => {
+    expect(RoleDashboardIndex.RoleDashboard).toBeDefined();
+    expect(typeof RoleDashboardIndex.RoleDashboard).toBe('function');
   });
 
-  it('exposes the default export', () => {
-    expect(KycDocumentCaptureIndex.default).toBeDefined();
-    expect(typeof KycDocumentCaptureIndex.default).toBe('function');
+  it('exposes the WidgetCard component', () => {
+    expect(RoleDashboardIndex.WidgetCard).toBeDefined();
+    expect(typeof RoleDashboardIndex.WidgetCard).toBe('function');
   });
 
-  it('exposes document capture types and constants', () => {
-    expect(KycDocumentCaptureIndex.DOCUMENT_TYPES).toBeDefined();
-    expect(KycDocumentCaptureIndex.DOCUMENT_SIDES).toBeDefined();
-    expect(KycDocumentCaptureIndex.CAPTURE_STEPS).toBeDefined();
+  it('exposes the DashboardWidgetContent component', () => {
+    expect(RoleDashboardIndex.DashboardWidgetContent).toBeDefined();
+    expect(typeof RoleDashboardIndex.DashboardWidgetContent).toBe('function');
   });
 
-  it('exposes document capture utilities', () => {
-    expect(KycDocumentCaptureIndex.isDocumentType).toBeDefined();
-    expect(typeof KycDocumentCaptureIndex.isDocumentType).toBe('function');
-
-    expect(KycDocumentCaptureIndex.isDocumentSide).toBeDefined();
-    expect(typeof KycDocumentCaptureIndex.isDocumentSide).toBe('function');
-
-    expect(KycDocumentCaptureIndex.getDocumentCaptureStep).toBeDefined();
-    expect(typeof KycDocumentCaptureIndex.getDocumentCaptureStep).toBe('function');
+  it('exposes onboardingHints utilities', () => {
+    expect(RoleDashboardIndex.useOnboardingHint).toBeDefined();
+    expect(typeof RoleDashboardIndex.useOnboardingHint).toBe('function');
+    
+    expect(RoleDashboardIndex.LocalStorageHintStorage).toBeDefined();
+    expect(typeof RoleDashboardIndex.LocalStorageHintStorage).toBe('function'); // It's a class
+    
+    expect(RoleDashboardIndex.DEFAULT_HINT_STORAGE).toBeDefined();
+    
+    expect(RoleDashboardIndex.hintStorageKey).toBeDefined();
+    expect(typeof RoleDashboardIndex.hintStorageKey).toBe('function');
   });
 
-  it('validates document types with success and failure paths', () => {
-    expect(KycDocumentCaptureIndex.isDocumentType('passport')).toBe(true);
-    expect(KycDocumentCaptureIndex.isDocumentType('invalid')).toBe(false);
-    expect(KycDocumentCaptureIndex.isDocumentType(null)).toBe(false);
-    expect(KycDocumentCaptureIndex.isDocumentType(undefined)).toBe(false);
+  it('exposes widgets configuration and utilities', () => {
+    expect(RoleDashboardIndex.ROLE_CONFIGS).toBeDefined();
+    expect(RoleDashboardIndex.ROLE_WIDGET_IDS).toBeDefined();
+    expect(RoleDashboardIndex.INVESTOR_WIDGETS).toBeDefined();
+    expect(RoleDashboardIndex.ISSUER_WIDGETS).toBeDefined();
+    expect(RoleDashboardIndex.ADMIN_WIDGETS).toBeDefined();
+    expect(RoleDashboardIndex.DEFAULT_WIDGET_CONTENT).toBeDefined();
+    
+    expect(RoleDashboardIndex.getRoleDashboardConfig).toBeDefined();
+    expect(typeof RoleDashboardIndex.getRoleDashboardConfig).toBe('function');
+    
+    expect(RoleDashboardIndex.widgetTitle).toBeDefined();
+    expect(typeof RoleDashboardIndex.widgetTitle).toBe('function');
   });
 
-  it('validates document sides with success and failure paths', () => {
-    expect(KycDocumentCaptureIndex.isDocumentSide('front')).toBe(true);
-    expect(KycDocumentCaptureIndex.isDocumentSide('back')).toBe(true);
-    expect(KycDocumentCaptureIndex.isDocumentSide('invalid')).toBe(false);
-    expect(KycDocumentCaptureIndex.isDocumentSide(null)).toBe(false);
+  it('exposes roleDashboard.types constants and utilities', () => {
+    expect(RoleDashboardIndex.DASHBOARD_ROLES).toBeDefined();
+    expect(RoleDashboardIndex.GRID_COLUMNS).toBeDefined();
+    expect(RoleDashboardIndex.SLOT_SPAN).toBeDefined();
+    expect(RoleDashboardIndex.WIDGET_SLOTS).toBeDefined();
+    
+    expect(RoleDashboardIndex.isUserRole).toBeDefined();
+    expect(typeof RoleDashboardIndex.isUserRole).toBe('function');
   });
-
-  it('resolves capture steps deterministically', () => {
-    expect(KycDocumentCaptureIndex.getDocumentCaptureStep('front')).toBeDefined();
-    expect(KycDocumentCaptureIndex.getDocumentCaptureStep('back')).toBeDefined();
-    expect(KycDocumentCaptureIndex.getDocumentCaptureStep('invalid')).toBeUndefined();
-  });
-
+  
   it('does not expose unexpected properties', () => {
     const expectedExports = [
-      'KycDocumentCapture',
-      'default',
-      'DOCUMENT_TYPES',
-      'DOCUMENT_SIDES',
-      'CAPTURE_STEPS',
-      'isDocumentType',
-      'isDocumentSide',
-      'getDocumentCaptureStep'
+      'RoleDashboard',
+      'WidgetCard',
+      'DashboardWidgetContent',
+      'useOnboardingHint',
+      'LocalStorageHintStorage',
+      'DEFAULT_HINT_STORAGE',
+      'hintStorageKey',
+      'ROLE_CONFIGS',
+      'ROLE_WIDGET_IDS',
+      'INVESTOR_WIDGETS',
+      'ISSUER_WIDGETS',
+      'ADMIN_WIDGETS',
+      'DEFAULT_WIDGET_CONTENT',
+      'getRoleDashboardConfig',
+      'widgetTitle',
+      'DASHBOARD_ROLES',
+      'GRID_COLUMNS',
+      'SLOT_SPAN',
+      'WIDGET_SLOTS',
+      'isUserRole'
     ];
-
-    const actualExports = Object.keys(KycDocumentCaptureIndex);
-
+    
+    const actualExports = Object.keys(RoleDashboardIndex);
+    
     for (const key of actualExports) {
       expect(expectedExports.includes(key)).toBe(true);
     }
-
+    
     for (const key of expectedExports) {
       expect(actualExports.includes(key)).toBe(true);
     }

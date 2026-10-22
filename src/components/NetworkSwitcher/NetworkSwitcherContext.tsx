@@ -1,4 +1,4 @@
-import React, { createContext, useState, useCallback, useMemo } from 'react';
+import React, { createContext, useState, useCallback, useMemo, useRef } from 'react';
 import {
   DEFAULT_APP_CHAIN_ID,
   getChainMetadata,
@@ -23,6 +23,8 @@ export interface NetworkSwitcherContextValue {
   isMismatch: boolean;
   /** Is the chain mismatch modal open? */
   isModalOpen: boolean;
+  /** Chain ID for which the mismatch modal was dismissed (null if not dismissed) */
+  dismissedForChainId: number | null;
   /** Is a wallet switch request currently pending? */
   isSwitching: boolean;
   /** Metadata for connected wallet chain */
@@ -45,8 +47,12 @@ export interface NetworkSwitcherContextValue {
   setIsWalletConnected: (connected: boolean) => void;
   /** Open mismatch modal */
   openModal: () => void;
+  /** Record (or clear) the chain the mismatch modal was dismissed for */
+  setDismissedForChainId: (chainId: number | null) => void;
   /** Close mismatch modal */
   closeModal: () => void;
+  /** Dismiss mismatch modal for the current connected chain */
+  dismissModal: () => void;
 }
 
 export const NetworkSwitcherContext =
@@ -97,6 +103,9 @@ export const NetworkSwitcherProvider: React.FC<NetworkSwitcherProviderProps> = (
     initialDismissedForChainId,
   );
   const [isSwitching, setIsSwitching] = useState<boolean>(false);
+  // Latest connected chain, read by closeModal/dismissModal so those callbacks stay referentially stable.
+  const connectedChainIdRef = useRef(connectedChainId);
+  connectedChainIdRef.current = connectedChainId;
 
   const isMismatch = useMemo(() => {
     if (!isWalletConnected) return false;
@@ -146,13 +155,13 @@ export const NetworkSwitcherProvider: React.FC<NetworkSwitcherProviderProps> = (
 
   const closeModal = useCallback(() => {
     setIsModalOpen(false);
-    setDismissedForChainId(connectedChainId);
-  }, [connectedChainId]);
+    setDismissedForChainId(connectedChainIdRef.current);
+  }, []);
 
   const dismissModal = useCallback(() => {
     setIsModalOpen(false);
-    setDismissedForChainId(connectedChainId);
-  }, [connectedChainId]);
+    setDismissedForChainId(connectedChainIdRef.current);
+  }, []);
 
   const switchWalletChain = useCallback(async () => {
     if (isSwitching) return;

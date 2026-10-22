@@ -64,7 +64,7 @@ const ComplianceHoldDemo: React.FC = () => {
     setHolds((prev) =>
       prev.map((hold) => ({
         ...hold,
-        severity: hold.severity === "blocking" ? "info" : "blocking",
+        severity: (hold.severity === "blocking" ? "info" : "blocking") as typeof hold.severity,
       }))
     );
   };

@@ -13,7 +13,7 @@ const renderComponent = () => {
 
 describe('OfferingWizardSummary', () => {
   beforeEach(() => {
-    vi.useFakeTimers();
+    vi.useFakeTimers({ shouldAdvanceTime: true });
   });
 
   afterEach(() => {
@@ -47,7 +47,7 @@ describe('OfferingWizardSummary', () => {
   });
 
   it('enables submit button when acknowledgement is checked', async () => {
-    const user = userEvent.setup({ delay: null });
+    const user = userEvent.setup();
     renderComponent();
 
     const checkbox = screen.getByLabelText(/I acknowledge that by submitting this offering/i);
@@ -61,8 +61,8 @@ describe('OfferingWizardSummary', () => {
     expect(submitBtn).toBeEnabled();
   });
 
-  it('shows submitting state and re-enables after mock submit', async () => {
-    const user = userEvent.setup({ delay: null });
+  it('submits and hands off to the registration success screen', async () => {
+    const user = userEvent.setup();
     renderComponent();
 
     const checkbox = screen.getByLabelText(/I acknowledge that by submitting this offering/i);
@@ -71,17 +71,12 @@ describe('OfferingWizardSummary', () => {
     const submitBtn = screen.getByRole('button', { name: 'Submit Offering' });
     await user.click(submitBtn);
 
-    expect(submitBtn).toHaveAttribute('aria-busy', 'true');
-    expect(submitBtn).toHaveTextContent('Submitting...');
-    expect(submitBtn).toBeDisabled();
-
-    act(() => {
-      vi.advanceTimersByTime(1500);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
     });
 
-    expect(submitBtn).not.toHaveAttribute('aria-busy', 'true');
-    expect(submitBtn).toHaveTextContent('Submit Offering');
-    expect(submitBtn).toBeEnabled();
+    expect(screen.queryByRole('button', { name: 'Submit Offering' })).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 2, name: /Review Timeline/i })).toBeInTheDocument();
   });
 
   it('has accessible acknowledgement checkbox', () => {

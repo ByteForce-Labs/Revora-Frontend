@@ -68,7 +68,7 @@ const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onTabChange, className = '
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
               onKeyDown={(e) => handleKeyDown(e, index)}
-              className={`tab-btn flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap focus-visible\:ring-2 focus-visible\:ring-primary focus-visible\:outline-none ${isActive
+              className={`tab-btn flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none ${isActive
                   ? 'bg-primary text-white border border-primary/20'
                   : 'bg-glass-bg border border-glass-border text-muted hover:bg-glass-border/50 hover:text-text-main'}
                 } ${isFocused ? 'ring-2 ring-primary ring-offset-2 ring-offset-bg-color' : ''}

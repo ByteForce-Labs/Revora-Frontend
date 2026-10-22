@@ -46,7 +46,7 @@ exports[`TransactionReceiptShare > renders correctly and matches snapshot 1`] = 
         class="tx-action-group"
       >
         <button
-          aria-label="Copy receipt as image"
+          aria-label="Copy image of receipt"
           class="tx-action-btn"
           type="button"
         >
@@ -243,8 +243,10 @@ exports[`TransactionReceiptShare > renders correctly and matches snapshot 1`] = 
       <div
         class="tx-receipt-footer"
       >
-        Generated securely by 
-        Revora
+        <div>
+          Generated securely by 
+          Revora
+        </div>
       </div>
     </div>
   </div>

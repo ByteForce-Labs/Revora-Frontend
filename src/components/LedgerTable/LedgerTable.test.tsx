@@ -4,7 +4,7 @@ import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import userEvent from '@testing-library/user-event';
 import { axe } from 'jest-axe';
 import LedgerTable from './LedgerTable';
-import type { Column, LedgerDrawerConfig } from './LedgerTable';
+import type { Column, LedgerDrawerConfig, LedgerTableProps } from './LedgerTable';
 
 interface TestRow {
   id: number;
@@ -327,8 +327,10 @@ describe('LedgerTable', () => {
     });
 
     it('handles RTL direction key navigation', () => {
-      // Mock RTL direction on container
-      const { container } = render(
+      // jsdom does not derive computed `direction` from a `dir` attribute,
+      // so mark the document itself as RTL for the duration of this test.
+      document.dir = 'rtl';
+      render(
         <div dir="rtl">
           <LedgerTable
             data={data}
@@ -345,6 +347,7 @@ describe('LedgerTable', () => {
       fireEvent.keyDown(grid, { key: 'ArrowLeft' });
       const focusOverlay = screen.getByTestId('focus-ring-overlay');
       expect(focusOverlay).toHaveClass('lt-focus-ring-overlay--cell');
+      document.dir = '';
     });
   });
 });
@@ -374,10 +377,10 @@ describe('LedgerTable – row-detail side drawer (Issue #628)', () => {
     { id: 'ENT-0003', date: '2026-01-03', amount: 300, status: 'failed' },
   ];
 
-  const drawerConfig: LedgerDrawerConfig = { deepLinkParam: 'entry' };
+  const drawerConfig: LedgerDrawerConfig<LedgerEntry> = { deepLinkParam: 'entry' };
 
   const renderDrawerTable = (
-    props: Partial<React.ComponentProps<typeof LedgerTable>> = {},
+    props: Partial<LedgerTableProps<LedgerEntry>> = {},
   ) =>
     render(
       <LedgerTable

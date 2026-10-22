@@ -240,7 +240,7 @@ describe('PermissionMatrix – selection', () => {
         const cell = screen.getByTestId('pm-cell-r1-i1');
         await userEvent.dblClick(cell);
         await userEvent.dblClick(cell);
-        expect(screen.queryByText(/selected/)).not.toBeInTheDocument();
+        expect(screen.queryByText(/^\d+ selected$/)).not.toBeInTheDocument();
     });
 
     it('selects all cells in a row via row checkbox', async () => {
@@ -258,7 +258,7 @@ describe('PermissionMatrix – selection', () => {
         const rowCheck = screen.getByTestId('pm-row-check-r1');
         await userEvent.click(rowCheck);
         await userEvent.click(rowCheck);
-        expect(screen.queryByText(/selected/)).not.toBeInTheDocument();
+        expect(screen.queryByText(/^\d+ selected$/)).not.toBeInTheDocument();
     });
 
     it('selects all cells in a column via column checkbox', async () => {
@@ -276,7 +276,7 @@ describe('PermissionMatrix – selection', () => {
         const colCheck = screen.getByTestId('pm-col-check-i1');
         await userEvent.click(colCheck);
         await userEvent.click(colCheck);
-        expect(screen.queryByText(/selected/)).not.toBeInTheDocument();
+        expect(screen.queryByText(/^\d+ selected$/)).not.toBeInTheDocument();
     });
 
     it('clear selection button removes all selected cells', async () => {
@@ -284,7 +284,7 @@ describe('PermissionMatrix – selection', () => {
         await userEvent.click(screen.getByTestId('pm-row-check-r1'));
         await waitFor(() => screen.getByTestId('pm-clear-selection'));
         await userEvent.click(screen.getByTestId('pm-clear-selection'));
-        expect(screen.queryByText(/selected/)).not.toBeInTheDocument();
+        expect(screen.queryByText(/^\d+ selected$/)).not.toBeInTheDocument();
     });
 
     it('does not show selection controls in readOnly mode', () => {
@@ -483,7 +483,7 @@ describe('PermissionMatrix – keyboard navigation', () => {
         const cell = screen.getByTestId('pm-cell-r1-i1');
         fireEvent.keyDown(cell, { key: 'Escape' });
         await waitFor(() => {
-            expect(screen.queryByText(/selected/)).not.toBeInTheDocument();
+            expect(screen.queryByText(/^\d+ selected$/)).not.toBeInTheDocument();
         });
     });
 
@@ -549,8 +549,9 @@ describe('PermissionMatrix – save flow', () => {
             expect(screen.getByTestId('pm-diff-modal')).toBeInTheDocument();
         });
         // Should show role name and issuer name in the table
-        expect(screen.getByText('Admin')).toBeInTheDocument();
-        expect(screen.getByText('Alpha Ventures')).toBeInTheDocument();
+        const modal = within(screen.getByTestId('pm-diff-modal'));
+        expect(modal.getByText('Admin')).toBeInTheDocument();
+        expect(modal.getByText('Alpha Ventures')).toBeInTheDocument();
     });
 
     it('confirms save calls onSave callback', async () => {
@@ -714,12 +715,12 @@ describe('PermissionMatrixDiffModal', () => {
 
     it('shows the number of changes in the description', () => {
         renderDiffModal();
-        expect(screen.getByText(/2 changes/)).toBeInTheDocument();
+        expect(screen.getByText(/Review the 2 changes/)).toBeInTheDocument();
     });
 
     it('singular "1 change" when only one diff', () => {
         renderDiffModal({ diffs: [SAMPLE_DIFFS[0]] });
-        expect(screen.getByText(/1 change/)).toBeInTheDocument();
+        expect(screen.getByText(/Review the 1 change\b/)).toBeInTheDocument();
     });
 
     it('renders diff table rows for each change', () => {

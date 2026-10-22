@@ -1,5 +1,5 @@
 import React from 'react';
-import { Check, AlertTriangle, XCircle, HelpCircle } from 'lucide-react';
+import { Check, AlertTriangle, XCircle, HelpCircle, type LucideIcon } from 'lucide-react';
 
 export type HealthStatus = 'healthy' | 'degraded' | 'outage' | 'unknown';
 
@@ -9,7 +9,7 @@ export interface StatusGlyphProps {
 }
 
 const STATUS_CONFIG: Record<HealthStatus, {
-  icon: React.FC<{ size?: number; className?: string; 'aria-hidden'?: string }>;
+  icon: LucideIcon;
   label: string;
   shapeClass: string;
 }> = {

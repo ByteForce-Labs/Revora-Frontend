@@ -54,7 +54,7 @@ describe("ProposalActionType preview handling", () => {
     render(<GovernanceProposalForm onSubmit={noop} />);
     await user.click(screen.getByLabelText(/Go to step 4: Preview/i));
 
-    expect(screen.getByText(/Transfer/)).toBeInTheDocument();
+    expect(screen.getAllByText(/Transfer/).length).toBeGreaterThan(0);
     expect(screen.getAllByText("—")).toHaveLength(2);
   });
 });

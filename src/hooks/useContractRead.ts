@@ -56,15 +56,22 @@ export function useContractRead<T>(
   // Track retry attempts
   const retryAttempts = useRef(0);
   const abortController = useRef<AbortController | null>(null);
+  const retryTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isMounted = useRef(true);
 
-  const fetchData = useCallback(async (isRetry = false) => {
-    // Cancel any in-flight request
+  const fetchData = useCallback(async () => {
+    // Cancel any in-flight request and pending retry
     if (abortController.current) {
       abortController.current.abort();
     }
+    if (retryTimer.current) {
+      clearTimeout(retryTimer.current);
+      retryTimer.current = null;
+    }
 
     // Create new abort controller for this request
-    abortController.current = new AbortController();
+    const controller = new AbortController();
+    abortController.current = controller;
 
     setIsLoading(true);
     setIsError(false);
@@ -72,22 +79,27 @@ export function useContractRead<T>(
 
     try {
       const result = await fetchFn();
+      if (!isMounted.current || controller.signal.aborted) return;
       setData(result);
       setIsLoading(false);
       retryAttempts.current = 0; // Reset retry counter on success
     } catch (err) {
+      if (!isMounted.current || controller.signal.aborted) return;
+
+      // Automatic retry logic: stay in the loading state while retries remain
+      if (retryAttempts.current < retryCount) {
+        retryAttempts.current += 1;
+        retryTimer.current = setTimeout(() => {
+          retryTimer.current = null;
+          fetchData();
+        }, retryDelay);
+        return;
+      }
+
       const errorMessage = err instanceof Error ? err.message : String(err);
       setError(errorMessage);
       setIsError(true);
       setIsLoading(false);
-
-      // Automatic retry logic
-      if (!isRetry && retryAttempts.current < retryCount) {
-        retryAttempts.current += 1;
-        setTimeout(() => {
-          fetchData(true);
-        }, retryDelay);
-      }
     }
   }, [fetchFn, retryCount, retryDelay]);
 
@@ -105,14 +117,21 @@ export function useContractRead<T>(
 
   // Auto-fetch on mount if enabled
   useEffect(() => {
+    isMounted.current = true;
     if (enabled) {
+      retryAttempts.current = 0;
       fetchData();
     }
 
     // Cleanup on unmount
     return () => {
+      isMounted.current = false;
       if (abortController.current) {
         abortController.current.abort();
+      }
+      if (retryTimer.current) {
+        clearTimeout(retryTimer.current);
+        retryTimer.current = null;
       }
     };
   }, [enabled, fetchData]);

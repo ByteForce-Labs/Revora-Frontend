@@ -37,7 +37,7 @@ describe("InvestorPortfolioSummary", () => {
 
   it("renders page heading", () => {
     renderPage();
-    expect(screen.getByRole("heading", { level: 1, name: /Portfolio Summary/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: /Portfolio Overview/i })).toBeInTheDocument();
   });
 
   it("renders back navigation link to /investor/portal", () => {
@@ -46,9 +46,9 @@ describe("InvestorPortfolioSummary", () => {
     expect(link).toHaveAttribute("href", "/investor/portal");
   });
 
-  it("renders KPI header", () => {
+  it("renders the dashboard hero", () => {
     renderPage();
-    expect(screen.getByTestId("kpi-header")).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: /Portfolio Overview/i })).toBeInTheDocument();
   });
 
   it("renders allocation widget", () => {
@@ -86,7 +86,7 @@ describe("InvestorPortfolioSummary", () => {
       </MemoryRouter>
     );
     expect(screen.getByTestId("portfolio-summary")).toBeInTheDocument();
-    expect(screen.getByTestId("kpi-header")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1 })).toBeInTheDocument();
   });
 
   it("handles empty allocations gracefully", () => {
@@ -110,7 +110,7 @@ describe("InvestorPortfolioSummary", () => {
   it("renders subtitle text", () => {
     renderPage();
     expect(
-      screen.getByText(/Your holdings, allocation, and 12-month performance at a glance/i)
+      screen.getByText(/Track your personal returns and manage upcoming actions/i)
     ).toBeInTheDocument();
   });
 });

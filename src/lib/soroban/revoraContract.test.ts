@@ -3,7 +3,7 @@
  * Tests the read-only Soroban client with mocked rpc.Server
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { rpc } from '@stellar/stellar-sdk';
 import {
   CONTRACT_METHODS,
@@ -16,6 +16,8 @@ import {
   getUnclaimedSummary,
   getAuthorizedOfferings,
   getContractSummary,
+  setRpcServerFactory,
+  resetRpcServerFactory,
   type Period,
 } from './revoraContract';
 
@@ -42,6 +44,11 @@ describe('revoraContract', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockServer = new rpc.Server('https://test.rpc');
+    setRpcServerFactory(() => mockServer);
+  });
+
+  afterEach(() => {
+    resetRpcServerFactory();
   });
 
   describe('CONTRACT_METHODS', () => {

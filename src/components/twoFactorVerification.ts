@@ -62,12 +62,12 @@ async function generateTotp(secret: ArrayBuffer, counter: number): Promise<strin
 
   const key = await subtle.importKey(
     'raw',
-    secret,
+    new Uint8Array(secret),
     { name: 'HMAC', hash: 'SHA-1' },
     false,
     ['sign'],
   );
-  const digest = new Uint8Array(await subtle.sign('HMAC', key, counterBytes(counter)));
+  const digest = new Uint8Array(await subtle.sign('HMAC', key, new Uint8Array(counterBytes(counter))));
   const offset = digest[digest.length - 1] & 0x0f;
   const binary =
     ((digest[offset] & 0x7f) << 24) |

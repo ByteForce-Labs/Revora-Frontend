@@ -35,8 +35,9 @@ describe('EventDiffViewer', () => {
   it('copies a plain-text diff when requested', async () => {
     const user = userEvent.setup();
     const writeText = vi.fn().mockResolvedValue(undefined);
-    Object.assign(navigator, {
-      clipboard: { writeText },
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText },
+      configurable: true,
     });
 
     render(

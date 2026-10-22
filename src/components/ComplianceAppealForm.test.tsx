@@ -4,7 +4,7 @@
 
 import React from "react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import { axe, toHaveNoViolations } from "jest-axe";
 import { ComplianceAppealForm } from "./ComplianceAppealForm";
 
@@ -32,7 +32,7 @@ describe("ComplianceAppealForm", () => {
 
   beforeEach(() => {
     localStorageMock.clear();
-    vi.useFakeTimers();
+    vi.useFakeTimers({ shouldAdvanceTime: true });
   });
 
   afterEach(() => {
@@ -117,6 +117,8 @@ describe("ComplianceAppealForm", () => {
     // Submit
     const submitButton = screen.getByRole("button", { name: /submit appeal/i });
     fireEvent.click(submitButton);
+    // Flush the simulated 1.5s submission delay
+    await act(async () => { await vi.advanceTimersByTimeAsync(1600); });
 
     // Wait for simulated submission
     await waitFor(() => {
@@ -143,6 +145,8 @@ describe("ComplianceAppealForm", () => {
     });
 
     fireEvent.click(screen.getByRole("button", { name: /submit appeal/i }));
+    // Flush the simulated 1.5s submission delay
+    await act(async () => { await vi.advanceTimersByTimeAsync(1600); });
 
     await waitFor(() => {
       expect(screen.getByText("Network error")).toBeInTheDocument();
@@ -165,6 +169,8 @@ describe("ComplianceAppealForm", () => {
     });
 
     fireEvent.click(screen.getByRole("button", { name: /submit appeal/i }));
+    // Flush the simulated 1.5s submission delay
+    await act(async () => { await vi.advanceTimersByTimeAsync(1600); });
 
     await waitFor(() => {
       expect(onSubmit).toHaveBeenCalledWith({
@@ -209,6 +215,8 @@ describe("ComplianceAppealForm", () => {
       target: { value: "incorrect_info" },
     });
     fireEvent.click(screen.getByRole("button", { name: /submit appeal/i }));
+    // Flush the simulated 1.5s submission delay
+    await act(async () => { await vi.advanceTimersByTimeAsync(1600); });
 
     await waitFor(() => {
       expect(screen.getByText("Submitted")).toBeInTheDocument();
@@ -227,6 +235,8 @@ describe("ComplianceAppealForm", () => {
       target: { value: "incorrect_info" },
     });
     fireEvent.click(screen.getByRole("button", { name: /submit appeal/i }));
+    // Flush the simulated 1.5s submission delay
+    await act(async () => { await vi.advanceTimersByTimeAsync(1600); });
 
     await waitFor(() => {
       expect(screen.getByText("Appeal submitted")).toBeInTheDocument();

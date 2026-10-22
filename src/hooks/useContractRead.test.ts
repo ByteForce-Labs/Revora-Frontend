@@ -39,7 +39,7 @@ describe('useContractRead', () => {
   it('handles fetch errors', async () => {
     const errorMessage = 'Network error';
     const fetchFn = vi.fn(() => Promise.reject(new Error(errorMessage)));
-    const { result } = renderHook(() => useContractRead(fetchFn));
+    const { result } = renderHook(() => useContractRead(fetchFn, { retryCount: 0 }));
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);

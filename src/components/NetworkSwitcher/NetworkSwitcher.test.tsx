@@ -116,9 +116,9 @@ describe('NetworkSwitcher', () => {
     );
     fireEvent.click(screen.getByRole('button', { name: /select network/i }));
     fireEvent.click(screen.getByText('Ethereum'));
-    fireEvent.click(screen.getByRole('button', { name: /Ethereum/i }));
+    fireEvent.click(screen.getByRole('button', { name: /select network/i }));
     fireEvent.click(screen.getByText('Polygon'));
-    fireEvent.click(screen.getByRole('button', { name: /Polygon/i }));
+    fireEvent.click(screen.getByRole('button', { name: /select network/i }));
     expect(screen.getByText('Recent Networks')).toBeInTheDocument();
   });
 
@@ -129,9 +129,9 @@ describe('NetworkSwitcher', () => {
     );
     fireEvent.click(screen.getByRole('button', { name: /select network/i }));
     fireEvent.click(screen.getByText('Ethereum'));
-    fireEvent.click(screen.getByRole('button', { name: /Ethereum/i }));
+    fireEvent.click(screen.getByRole('button', { name: /select network/i }));
     fireEvent.click(screen.getByText('Polygon'));
-    fireEvent.click(screen.getByRole('button', { name: /Polygon/i }));
+    fireEvent.click(screen.getByRole('button', { name: /select network/i }));
     expect(screen.getByRole('separator')).toBeInTheDocument();
   });
 

@@ -42,8 +42,9 @@ describe('AuthLayout', () => {
       </AuthLayout>
     );
     
-    const outerDiv = container.querySelector('.animate-fade-in');
-    expect(outerDiv).toHaveClass('auth-layout-outer');
+    const outerDiv = container.querySelector('.auth-page-container');
+    expect(outerDiv).toBeInTheDocument();
+    expect(container.querySelector('.animate-fade-in')).toBeInTheDocument();
   });
 
   it('has proper card responsive padding', () => {

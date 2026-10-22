@@ -17,28 +17,24 @@ describe("ComplianceHoldBanner", () => {
   };
 
   describe("empty-result and failure paths", () => {
-    it("returns null directly when holds array is empty", () => {
-      const result = ComplianceHoldBanner({ holds: [] });
-      expect(result).toBeNull();
+    it("renders nothing when holds array is empty", () => {
+      const { container } = render(<ComplianceHoldBanner holds={[]} />);
+      expect(container.firstChild).toBeNull();
     });
 
-    it("returns null directly when holds is null", () => {
-      const result = ComplianceHoldBanner({ holds: null as any });
-      expect(result).toBeNull();
+    it("renders nothing when holds is null", () => {
+      const { container } = render(<ComplianceHoldBanner holds={null as any} />);
+      expect(container.firstChild).toBeNull();
     });
 
-    it("returns null directly when holds is undefined", () => {
-      const result = ComplianceHoldBanner({ holds: undefined as any });
-      expect(result).toBeNull();
+    it("renders nothing when holds is undefined", () => {
+      const { container } = render(<ComplianceHoldBanner holds={undefined as any} />);
+      expect(container.firstChild).toBeNull();
     });
   });
 
   describe("neighboring normal path", () => {
-    it("returns valid element (not null) when holds array has valid items", () => {
-      const result = ComplianceHoldBanner({ holds: [mockHold] });
-      expect(result).not.toBeNull();
-      
-      // Ensure it renders properly in the DOM
+    it("renders an element when holds array has valid items", () => {
       const { container } = render(<ComplianceHoldBanner holds={[mockHold]} />);
       expect(container.firstChild).not.toBeNull();
     });
@@ -47,9 +43,14 @@ describe("ComplianceHoldBanner", () => {
   describe("boundary behavior", () => {
     it("throws an explicit error when provided an invalid severity", () => {
       const invalidHold = { ...mockHold, severity: "invalid-severity" as any };
-      expect(() => {
-        ComplianceHoldBanner({ holds: [invalidHold] });
-      }).toThrowError("Invalid ComplianceSeverity: invalid-severity");
+      const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+      try {
+        expect(() => {
+          render(<ComplianceHoldBanner holds={[invalidHold]} />);
+        }).toThrowError("Invalid ComplianceSeverity: invalid-severity");
+      } finally {
+        spy.mockRestore();
+      }
     });
   });
 

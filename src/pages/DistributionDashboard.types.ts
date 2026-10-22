@@ -2,6 +2,7 @@ import { PayoutDetail, PayoutStatus, RecipientItem, RetryEvent } from '../compon
 
 export interface ExtendedPayoutDetail extends PayoutDetail {
   tier?: string;
+  region?: string;
 }
 
 export interface IssuerComparisonData {

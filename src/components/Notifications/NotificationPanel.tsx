@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 import { Notification } from './notificationsData';
 import { EmptyState } from '../designSystem/EmptyState';
 
@@ -8,6 +8,7 @@ interface NotificationPanelProps {
 }
 
 const NotificationPanel: React.FC<NotificationPanelProps> = ({ notifications, onClose }) => {
+  const headingId = useId();
   const handleMarkAllRead = () => {
     // In a real app, this would update state/store; here we just log.
     console.log('Mark all as read');
@@ -18,9 +19,10 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ notifications, on
       className="absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto bg-white dark:bg-gray-800 shadow-lg rounded-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50"
       role="dialog"
       aria-modal="true"
+      aria-labelledby={headingId}
     >
       <div className="p-4 flex justify-between items-center border-b border-gray-200 dark:border-gray-700">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Notifications</h3>
+        <h3 id={headingId} className="text-lg font-medium text-gray-900 dark:text-gray-100">Notifications</h3>
         <button
           className="text-sm text-primary hover:underline focus-visible:outline-none"
           onClick={handleMarkAllRead}

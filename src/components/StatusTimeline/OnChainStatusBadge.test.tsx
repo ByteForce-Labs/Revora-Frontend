@@ -80,6 +80,8 @@ describe('OnChainStatusBadge', () => {
 
   it('announces copy success via polite live region', async () => {
     const user = userEvent.setup();
+    // userEvent.setup() installs its own clipboard stub, so spy on it afterwards.
+    const writeText = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue(undefined);
     render(<OnChainStatusBadge metadata={fullMetadata} />);
 
     await user.click(screen.getByRole('button', { name: /copy hash/i }));
@@ -89,9 +91,7 @@ describe('OnChainStatusBadge', () => {
         'Transaction hash copied to clipboard.',
       );
     });
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-      fullMetadata.transactionHash,
-    );
+    expect(writeText).toHaveBeenCalledWith(fullMetadata.transactionHash);
   });
 
   it('disables copy when block number is missing', () => {

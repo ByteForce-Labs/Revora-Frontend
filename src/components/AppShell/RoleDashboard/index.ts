@@ -44,7 +44,7 @@ export type {
   DashboardMetric,
   DashboardRowTone,
   DashboardWidget,
-  DashboardWidgetContent,
+  DashboardWidgetContent as DashboardWidgetContentData,
   RoleDashboardConfig,
   RoleOnboarding,
 } from './roleDashboard.types';

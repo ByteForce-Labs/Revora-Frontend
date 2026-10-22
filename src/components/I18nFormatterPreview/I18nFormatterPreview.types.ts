@@ -15,7 +15,7 @@ export interface I18nFormatterPreviewProps {
 
 export interface SampleRowData {
   id: string;
-  category: "number" | "compact" | "percent" | "currency" | "date" | "long-date" | "rtl-copy";
+  category: "number" | "compact" | "percent" | "currency" | "date" | "long-date" | "rtl-copy" | "copy-expansion";
   categoryLabel: string;
   description: string;
   rawSample: string;

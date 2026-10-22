@@ -19,7 +19,7 @@ describe('AuditNoteEditor.types', () => {
       expect(DEFAULT_TEMPLATES.length).toBeGreaterThan(0);
 
       for (const template of DEFAULT_TEMPLATES) {
-        expect(Object.keys(template).sort()).toEqual(TEMPLATE_KEYS);
+        expect(Object.keys(template).sort()).toEqual([...TEMPLATE_KEYS].sort());
         expect(typeof template.id).toBe('string');
         expect(typeof template.label).toBe('string');
         expect(typeof template.content).toBe('string');

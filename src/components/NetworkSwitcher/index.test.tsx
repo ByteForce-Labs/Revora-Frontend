@@ -164,7 +164,7 @@ describe('NetworkSwitcher barrel — provider state transitions', () => {
   it('starts in the default state (Polygon app chain, mismatched Ethereum wallet, modal closed)', () => {
     let snapshot: ReturnType<typeof useNetworkSwitcher> | undefined;
     render(
-      <NetworkSwitcherProvider>
+      <NetworkSwitcherProvider initialConnectedChainId={1}>
         <Probe onState={(s) => { snapshot = s; }} />
       </NetworkSwitcherProvider>,
     );
@@ -389,7 +389,7 @@ describe('NetworkSwitcher barrel — provider state transitions', () => {
 describe('NetworkSwitcher barrel — hook and modal error/boundary behavior', () => {
   it('renders the exported ChainMismatchModal as an accessible dialog with focus trapped to it', async () => {
     render(
-      <NetworkSwitcherProvider initialIsModalOpen>
+      <NetworkSwitcherProvider initialIsModalOpen initialConnectedChainId={1}>
         <ChainMismatchModal />
       </NetworkSwitcherProvider>,
     );
@@ -415,19 +415,19 @@ describe('NetworkSwitcher barrel — hook and modal error/boundary behavior', ()
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('keeps the modal open after Escape when only the context close is used and the chain mismatch persists (boundary)', async () => {
+  it('dismisses the modal on Escape via the context close even while the chain mismatch persists (boundary)', async () => {
     const user = userEvent.setup();
     render(
-      <NetworkSwitcherProvider initialIsModalOpen>
+      <NetworkSwitcherProvider initialIsModalOpen initialConnectedChainId={1}>
         <ChainMismatchModal />
       </NetworkSwitcherProvider>,
     );
 
     expect(screen.getByRole('dialog')).toBeInTheDocument();
     await user.keyboard('{Escape}');
-    // Derived visibility is `contextIsOpen || isMismatch`; the mismatch persists,
-    // so the dialog remains mounted even though closeModal() ran.
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    // closeModal() records the dismissed chain (#982), so the dialog stays
+    // closed while the wallet remains on the same mismatched chain.
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
   it('throws a deterministic error when useNetworkSwitcher is used outside the provider (failure path)', () => {

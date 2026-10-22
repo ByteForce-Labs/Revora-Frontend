@@ -55,6 +55,7 @@ import {
   ChevronRight,
   AlertTriangle,
   LoaderCircle,
+  type LucideIcon,
 } from 'lucide-react';
 import type { CommandItem, CommandGroup } from './commandPaletteData';
 import {
@@ -69,7 +70,7 @@ import './CommandPalette.css';
 // Icon resolver
 // ---------------------------------------------------------------------------
 
-const ICON_MAP: Record<string, React.ComponentType<{ size?: number; 'aria-hidden'?: boolean | 'true' | 'false' }>> = {
+const ICON_MAP: Record<string, LucideIcon> = {
   Home,
   LayoutDashboard,
   Search,
@@ -409,7 +410,6 @@ export function CommandPalette({
     if (confirmingItemId && query.trim().length >= 2) {
       setConfirmingItemId(null);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]);
 
   // ------------------------------------------------------------------

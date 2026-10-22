@@ -27,7 +27,7 @@ describe('ActivityDateGroup', () => {
       const separator = screen.getByRole('separator');
       expect(separator).toBeInTheDocument();
       expect(separator).toHaveAttribute('aria-label', `Activities on ${dateInput}`);
-      expect(screen.getByText(dateInput)).toBeInTheDocument();
+      expect(separator.querySelector('.date-label')?.textContent).toBe(dateInput);
       unmount();
     });
   });
@@ -35,9 +35,9 @@ describe('ActivityDateGroup', () => {
   it('meets accessibility standards without axe violations', async () => {
     // ActivityDateGroup renders an <li>, so for valid HTML structure in tests, wrap in a <ul> or test directly if axe allows
     const { container } = render(
-      <ul>
+      <div>
         <ActivityDateGroup date="Today" />
-      </ul>
+      </div>
     );
     const results = await axe(container);
     expect(results).toHaveNoViolations();

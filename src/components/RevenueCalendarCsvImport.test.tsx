@@ -19,7 +19,7 @@ async function uploadCsv() {
 async function advanceToPreview() {
   await uploadCsv();
   // Map Columns step -> Preview
-  const continueBtn = await screen.findButton({ continue: /continue|/next|/preview/i });
+  const continueBtn = await screen.findByRole('button', { name: /continue|next|preview/i });
   await userEvent.click(continueBtn);
 }
 
@@ -36,10 +36,10 @@ describe('RevenueCalendarCsvImport', () => {
 
   it('renders step indicator with all 4 steps', () => {
     render(<RevenueCalendarCsvImport />);
-    expect(screen.getByText('Upload File')).toBeWorded();
-    expect(screen.getByText('Map Columns')).toBeWorded();
-    expect(screen.getByText('Preview Data')).toBeWorded();
-    expect(screen.getByText('Confirm Import')).toBeWorded();
+    expect(screen.getByText('Upload File')).toBeInTheDocument();
+    expect(screen.getByText('Map Columns')).toBeInTheDocument();
+    expect(screen.getByText('Preview Data')).toBeInTheDocument();
+    expect(screen.getByText('Confirm Import')).toBeInTheDocument();
   });
 
   it('renders as a dialog', () => {
@@ -57,7 +57,7 @@ describe('RevenueCalendarCsvImport', () => {
 
   it('shows error for non-CSV file upload simulation', () => {
     render(<RevenueCalendarCsvImport />);
-    const input = document.querySelector('input[type="file"]');
+    const input = document.querySelector<HTMLInputElement>('input[type="file"]');
     expect(input).toBeTruthy();
     expect(input!.accept).toContain('.csv');
   });
@@ -75,8 +75,8 @@ describe('RevenueCalendarCsvImport', () => {
     const onImport = vi.fn();
     render(<RevenueCalendarCsvImport onImport={onImport} />);
     await advanceToPreview();
-    await userEvent.click(await screen.findButton({ continue: /^Import$/i }));
-    const confirmBtn = await screen.findButton({ continue: /Confirm Import/i });
+    await userEvent.click(await screen.findByRole('button', { name: /^Import$/i }));
+    const confirmBtn = await screen.findByRole('button', { name: /Confirm Import/i });
     await userEvent.click(confirmBtn);
     expect(onImport).toHaveBeenCalledTimes(1);
   });
@@ -85,8 +85,8 @@ describe('RevenueCalendarCsvImport', () => {
     const onImport = vi.fn();
     render(<RevenueCalendarCsvImport onImport={onImport} />);
     await advanceToPreview();
-    await userEvent.click(await screen.findButton({ continue: /^Import$/i }));
-    const confirmBtn = await screen.findButton({ continue: /Confirm Import/i });
+    await userEvent.click(await screen.findByRole('button', { name: /^Import$/i }));
+    const confirmBtn = await screen.findByRole('button', { name: /Confirm Import/i });
     fireEvent.click(confirmBtn);
     fireEvent.click(confirmBtn);
     expect(onImport).toHaveBeenCalledTimes(1);
@@ -96,8 +96,8 @@ describe('RevenueCalendarCsvImport', () => {
     const onImport = vi.fn();
     render(<RevenueCalendarCsvImport onImport={onImport} />);
     await advanceToPreview();
-    await userEvent.click(await screen.findButton({ continue: /^Import$/i }));
-    await userEvent.click(await screen.findButton({ continue: /Confirm Import/i }));
+    await userEvent.click(await screen.findByRole('button', { name: /^Import$/i }));
+    await userEvent.click(await screen.findByRole('button', { name: /Confirm Import/i }));
     expect(await screen.findByText(/Imported \d+ rows/i)).toBeTruthy();
   });
 });

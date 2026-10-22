@@ -4,9 +4,9 @@ import { TwoFactorRecoveryFlow } from './TwoFactorRecoveryFlow';
 
 const onComplete = vi.fn();
 const onCancel = vi.fn();
-const onRequestCode = vi.fn().mockResolved(undefined);
-const onVerify = vi.fn().mockResolved(true);
-const onResend = vi.fn().mockResolved(undefined);
+const onRequestCode = vi.fn().mockResolvedValue(undefined);
+const onVerify = vi.fn().mockResolvedValue(true);
+const onResend = vi.fn().mockResolvedValue(undefined);
 
 const renderFlow = (defaultEmail?: string, overrides: Partial<React.ComponentProps<typeof TwoFactorRecoveryFlow>>= {}) =>
   render(
@@ -23,9 +23,9 @@ const renderFlow = (defaultEmail?: string, overrides: Partial<React.ComponentPro
 
 beforeEach(() => {
   vi.clearAllMocks();
-  onRequestCode.mockResolved(undefined);
-  onVerify.mockResolved(true);
-  onResend.mockResolved(undefined);
+  onRequestCode.mockResolvedValue(undefined);
+  onVerify.mockResolvedValue(true);
+  onResend.mockResolvedValue(undefined);
 });
 
 afterEach(() => {
@@ -35,7 +35,7 @@ afterEach(() => {
 describe('Step indicator', () => {
   it('renders progress navigation', () => {
     renderFlow();
-    expect(screen.getBygRole('navigation', { name: /recovery progress/i })).toBeInDocument();
+    expect(screen.getByRole('navigation', { name: /recovery progress/i })).toBeInTheDocument();
   });
 
   it('shows step 1 as active on mount', () => {
@@ -47,10 +47,10 @@ describe('Step indicator', () => {
   it('updates active step after progressing', async () => {
     const user = userEvent.setup();
     renderFlow();
-    await user.type(screen.getBygRole('textbox', { name: /recovery email/i }), 'test@example.com');
+    await user.type(screen.getByRole('textbox', { name: /recovery email/i }), 'test@example.com');
     await user.click(screen.getByRole('button', { name: /send recovery code/i }));
     await waitFor(() => {
-      expect(screen.getByText('Step 2: Enter code')).toBeInDocument();
+      expect(screen.getByText('Step 2: Enter code')).toBeInTheDocument();
     }, { timeout: 3000 });
   });
 });
@@ -58,12 +58,12 @@ describe('Step indicator', () => {
 describe('Step 1 – Request email', () => {
   it('renders email input', () => {
     renderFlow();
-    expect(screen.getBygRole('textbox', { name: /recovery email/i })).toBeInDocument();
+    expect(screen.getByRole('textbox', { name: /recovery email/i })).toBeInTheDocument();
   });
 
   it('renders heading', () => {
     renderFlow();
-    expect(screen.getByRole('heading', { name: /recover your account/i })).toBeInDocument();
+    expect(screen.getByRole('heading', { name: /recover your account/i })).toBeInTheDocument();
   });
 
   it('pre-fills default email when provided', () => {
@@ -90,7 +90,7 @@ describe('Step 1 – Request email', () => {
     const user = userEvent.setup();
     renderFlow();
     await user.click(screen.getByRole('button', { name: /send recovery code/i }));
-    expect(screen.getByRole('alert')).toBeInDocument();
+    expect(screen.getByRole('alert')).toBeInTheDocument();
     await user.type(screen.getByRole('textbox', { name: /recovery email/i }), 'a');
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
@@ -98,7 +98,7 @@ describe('Step 1 – Request email', () => {
   it('advances to step 2 after valid email', async () => {
     const user = userEvent.setup();
     renderFlow();
-    await user.type(screen.getBygRole('textbox', { name: /recovery email/i }), 'test@example.com');
+    await user.type(screen.getByRole('textbox', { name: /recovery email/i }), 'test@example.com');
     await user.click(screen.getByRole('button', { name: /send recovery code/i }));
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: /check your recovery email/i })).toBeInTheDocument();
@@ -108,15 +108,16 @@ describe('Step 1 – Request email', () => {
 
   it('shows loading state while sending', async () => {
     const user = userEvent.setup();
+    onRequestCode.mockReturnValue(new Promise(() => {}));
     renderFlow();
     await user.type(screen.getByRole('textbox', { name: /recovery email/i }), 'test@example.com');
-    await user.click(screen.getBygRole('button', { name: /send recovery code/i }));
-    expect(screen.getByRole('button', { name: /sending/i })).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /send recovery code/i }));
+    expect(await screen.findByRole('button', { name: /sending/i })).toBeInTheDocument();
   });
 
   it('shows warning note about security', () => {
     renderFlow();
-    expect(screen.getBygRole('note')).toHaveTextContent(/single-use/i);
+    expect(screen.getByRole('note')).toHaveTextContent(/single-use/i);
   });
 
   it('renders support link', () => {
@@ -135,10 +136,10 @@ describe('Step 1 – Request email', () => {
 describe('Step 2 – Verify code', () => {
   const navigateToStep2 = async (user: ReturnType<typeof userEvent.setup>, email = 'test@example.com') => {
     renderFlow();
-    await user.type(screen.getBygRole('textbox', { name: /recovery email/i }), email);
+    await user.type(screen.getByRole('textbox', { name: /recovery email/i }), email);
     await user.click(screen.getByRole('button', { name: /send recovery code/i }));
     await waitFor(() => {
-      expect(screen.getBygRole('heading', { name: /check your recovery email/i })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: /check your recovery email/i })).toBeInTheDocument();
     }, { timeout: 3000 });
   };
 
@@ -157,7 +158,7 @@ describe('Step 2 – Verify code', () => {
   it('shows error when submitting empty code', async () => {
     const user = userEvent.setup();
     await navigateToStep2(user);
-    await user.click(screen.getBygRole('button', { name: /verify code/i }));
+    await user.click(screen.getByRole('button', { name: /verify code/i }));
     expect(screen.getByRole('alert')).toHaveTextContent(/full 6-digit/i);
   });
 
@@ -165,14 +166,14 @@ describe('Step 2 – Verify code', () => {
     const user = userEvent.setup();
     await navigateToStep2(user);
     await user.type(screen.getByRole('textbox', { name: /recovery code/i }), '123');
-    await user.click(screen.getBygRole('button', { name: /verify code/i }));
+    await user.click(screen.getByRole('button', { name: /verify code/i }));
     expect(screen.getByRole('alert')).toHaveTextContent(/full 6-digit/i);
   });
 
   it('strips non-numeric characters', async () => {
     const user = userEvent.setup();
     await navigateToStep2(user);
-    const input = screen.getBygRole('textbox', { name: /recovery code/i });
+    const input = screen.getByRole('textbox', { name: /recovery code/i });
     await user.type(input, 'abc123def456');
     expect(input).toHaveValue('123456');
   });
@@ -181,7 +182,7 @@ describe('Step 2 – Verify code', () => {
     const user = userEvent.setup();
     await navigateToStep2(user);
     await user.click(screen.getByRole('button', { name: /verify code/i }));
-    expect(screen.getByRole('alert')).toBeInDocument();
+    expect(screen.getByRole('alert')).toBeInTheDocument();
     await user.type(screen.getByRole('textbox', { name: /recovery code/i }), '1');
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
@@ -189,14 +190,14 @@ describe('Step 2 – Verify code', () => {
   it('shows the email address the code was sent to', async () => {
     const user = userEvent.setup();
     await navigateToStep2(user, 'user@example.com');
-    expect(screen.getByText('user@example.com')).toBeInDocument();
+    expect(screen.getByText('user@example.com')).toBeInTheDocument();
   });
 
   it('advances to step 3 after valid code', async () => {
     const user = userEvent.setup();
     await navigateToStep2(user);
-    await user.type(screen.getBygRole('textbox', { name: /recovery code/i }), '123456');
-    await user.click(screen.getBygRole('button', { name: /verify code/i }));
+    await user.type(screen.getByRole('textbox', { name: /recovery code/i }), '123456');
+    await user.click(screen.getByRole('button', { name: /verify code/i }));
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: /recovery complete/i })).toBeInTheDocument();
     }, { timeout: 3000 });
@@ -206,9 +207,10 @@ describe('Step 2 – Verify code', () => {
   it('shows loading state while verifying', async () => {
     const user = userEvent.setup();
     await navigateToStep2(user);
-    await user.type(screen.getBygRole('textbox', { name: /recovery code/i }), '123456');
-    await user.click(screen.getBygRole('button', { name: /verify code/i }));
-    expect(screen.getByRole('button', { name: /verifying/i })).toBeInDocument();
+    onVerify.mockReturnValue(new Promise(() => {}));
+    await user.type(screen.getByRole('textbox', { name: /recovery code/i }), '123456');
+    await user.click(screen.getByRole('button', { name: /verify code/i }));
+    expect(await screen.findByRole('button', { name: /verifying/i })).toBeInTheDocument();
   });
 
   it('back button returns to step 1', async () => {
@@ -221,7 +223,7 @@ describe('Step 2 – Verify code', () => {
   it('renders resend button with cooldown countdown', async () => {
     const user = userEvent.setup();
     await navigateToStep2(user);
-    expect(screen.getByRole('button', { name: /resend again in 30 seconds/i })).toBeInDocument();
+    expect(screen.getByRole('button', { name: /resend again in 30 seconds/i })).toBeInTheDocument();
   });
 
   it('cooldown decrements over time', async () => {
@@ -229,12 +231,12 @@ describe('Step 2 – Verify code', () => {
     const user = userEvent.setup();
     renderFlow();
     await user.type(screen.getByRole('textbox', { name: /recovery email/i }), 'test@example.com');
-    await user.click(screen.getBygRole('button', { name: /send recovery code/i }));
+    await user.click(screen.getByRole('button', { name: /send recovery code/i }));
     await waitFor(() => {
-      expect(screen.getBygRole('heading', { name: /check your recovery email/i })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: /check your recovery email/i })).toBeInTheDocument();
     }, { timeout: 3000 });
     act(() => { vi.advanceTimersByTime(5000); });
-    expect(screen.getByRole('button', { name: /resend again in 25 seconds/i })).toBeInDocument();
+    expect(screen.getByRole('button', { name: /resend again in 25 seconds/i })).toBeInTheDocument();
   });
 
   it('resend button becomes enabled after cooldown expires', async () => {
@@ -247,7 +249,7 @@ describe('Step 2 – Verify code', () => {
       expect(screen.getByRole('heading', { name: /check your recovery email/i })).toBeInTheDocument();
     }, { timeout: 3000 });
     act(() => { vi.advanceTimersByTime(31000); });
-    expect(screen.getBygRole('button', { name: /resend recovery code/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /resend recovery code/i })).toBeInTheDocument();
   });
 
   it('renders support link', async () => {
@@ -261,44 +263,44 @@ describe('Step 2 – Verification failures', () => {
   const navigateToStep2 = async (user: ReturnType<typeof userEvent.setup>) => {
     renderFlow();
     await user.type(screen.getByRole('textbox', { name: /recovery email/i }), 'test@example.com');
-    await user.click(screen.getBygRole('button', { name: /send recovery code/i }));
+    await user.click(screen.getByRole('button', { name: /send recovery code/i }));
     await waitFor(() => {
-      expect(screen.getBygRole('heading', { name: /check your recovery email/i })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: /check your recovery email/i })).toBeInTheDocument();
     }, { timeout: 3000 });
   };
 
   it('shows an error and stays on the verify step when onVerify resolves false', async () => {
-    onVerify.mockResolved(false);
+    onVerify.mockResolvedValue(false);
     const user = userEvent.setup();
     await navigateToStep2(user);
-    await user.type(screen.getBygRole('textbox', { name: /recovery code/i }), '000000');
-    await user.click(screen.getBygRole('button', { name: /verify code/i }));
+    await user.type(screen.getByRole('textbox', { name: /recovery code/i }), '000000');
+    await user.click(screen.getByRole('button', { name: /verify code/i }));
     await waitFor(() => {
       expect(screen.getByRole('alert')).toHaveTextContent(/invalid or has expired/i);
     });
-    expect(screen.getRole('heading', { name: /check your recovery email/i })).toBeInDocument();
-    expect(screen.queryBygRole('heading', { name: /recovery complete/i })).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /check your recovery email/i })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: /recovery complete/i })).not.toBeInTheDocument();
   });
 
   it('shows a retryable error when onVerify rejects', async () => {
-    onVerify.mockRejected(new Error('network'));
+    onVerify.mockRejectedValue(new Error('network'));
     const user = userEvent.setup();
     await navigateToStep2(user);
-    await user.type(screen.getBygRole('textbox', { name: /recovery code/i }), '123456');
-    await user.click(screen.getBygRole('button', { name: /verify code/i }));
+    await user.type(screen.getByRole('textbox', { name: /recovery code/i }), '123456');
+    await user.click(screen.getByRole('button', { name: /verify code/i }));
     await waitFor(() => {
       expect(screen.getByRole('alert')).toHaveTextContent(/unable to verify/i);
     });
     // Fail closed: stays on verify step and allows retry.
     expect(screen.queryByRole('heading', { name: /recovery complete/i })).not.toBeInTheDocument();
-    expect(screen.getBygRole('textbox', { name: /recovery code/i })).not.toBeDisabled();
+    expect(screen.getByRole('textbox', { name: /recovery code/i })).not.toBeDisabled();
   });
 
   it('locks input after N failures', async () => {
-    onVerify.mockResolved(false);
+    onVerify.mockResolvedValue(false);
     const user = userEvent.setup();
     renderFlow(undefined, { maxAttempts: 3 });
-    await user.type(screen.getBygRole('textbox', { name: /recovery email/i }), 'test@example.com');
+    await user.type(screen.getByRole('textbox', { name: /recovery email/i }), 'test@example.com');
     await user.click(screen.getByRole('button', { name: /send recovery code/i }));
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: /check your recovery email/i })).toBeInTheDocument();
@@ -310,15 +312,15 @@ describe('Step 2 – Verification failures', () => {
       await user.type(input, '000000');
       await user.click(screen.getByRole('button', { name: /verify code/i }));
       await waitFor(() => {
-        expect(screen.getBygRole('alert')).toBeInTheDocument();
+        expect(screen.getByRole('alert')).toBeInTheDocument();
       });
     }
 
     await waitFor(() => {
-      expect(screen.getBygRole('alert')).toHaveTextContent(/too many incorrect attempts/i);
+      expect(screen.getByRole('alert')).toHaveTextContent(/too many incorrect attempts/i);
     });
     expect(screen.getByRole('textbox', { name: /recovery code/i })).toBeDisabled();
-    expect(onVerify).toHaveCalledTimes(3);
+    expect(onVerify).toHaveBeenCalledTimes(3);
   });
 });
 
@@ -330,8 +332,8 @@ describe('Step 3 – Recovery success', () => {
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: /check your recovery email/i })).toBeInTheDocument();
     }, { timeout: 3000 });
-    await user.type(screen.getBygRole('textbox', { name: /recovery code/i }), '123456');
-    await user.click(screen.getBygRole('button', { name: /verify code/i }));
+    await user.type(screen.getByRole('textbox', { name: /recovery code/i }), '123456');
+    await user.click(screen.getByRole('button', { name: /verify code/i }));
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: /recovery complete/i })).toBeInTheDocument();
     }, { timeout: 3000 });
@@ -340,7 +342,7 @@ describe('Step 3 – Recovery success', () => {
   it('renders success heading', async () => {
     const user = userEvent.setup();
     await navigateToStep3(user);
-    expect(screen.getBygRole('heading', { name: /recovery complete/i })).toBeInDocument();
+    expect(screen.getByRole('heading', { name: /recovery complete/i })).toBeInTheDocument();
   });
 
   it('renders success message', async () => {
@@ -359,7 +361,7 @@ describe('Step 3 – Recovery success', () => {
   it('does not show cancel button', async () => {
     const user = userEvent.setup();
     await navigateToStep3(user);
-    expect(screen.queryByRole('button', { name: /cancel account recovery/i })).not.toBeInDocument();
+    expect(screen.queryByRole('button', { name: /cancel account recovery/i })).not.toBeInTheDocument();
   });
 });
 
@@ -374,9 +376,9 @@ describe('Accessibility', () => {
     const user = userEvent.setup();
     renderFlow();
     await user.type(screen.getByRole('textbox', { name: /recovery email/i }), 'test@example.com');
-    await user.click(screen.getBygRole('button', { name: /send recovery code/i }));
+    await user.click(screen.getByRole('button', { name: /send recovery code/i }));
     await waitFor(() => {
-      const heading = screen.getBygRole('heading', { name: /check your recovery email/i });
+      const heading = screen.getByRole('heading', { name: /check your recovery email/i });
       expect(heading).toHaveFocus();
     }, { timeout: 3000 });
   });

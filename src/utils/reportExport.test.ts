@@ -253,8 +253,8 @@ function assertPdfByteAccuracy(bytes: Uint8Array): void {
 
   // Entry 0 is the free list head; entries 1..count-1 are objects.
   for (let i = 1; i < count; i++) {
-    const entry = lines[1 + i];
-    const match = /^(\d{,10}) (\d{3,5}) ([nf])$/.exec(entry);
+    const entry = lines[2 + i];
+    const match = /^(\d{10}) (\d{5}) ([nf]) ?$/.exec(entry);
     expect(match, `xref entry ${i} cannot be parsed: ${entry}`).not.toBeNull();
     const offset = Number(match![1]);
     const header = `${i} 0 obj`;

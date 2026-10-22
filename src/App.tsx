@@ -1,32 +1,11 @@
+import { useState, type MouseEvent } from "react";
 import {
   createBrowserRouter,
   Link,
+  Outlet,
   type RouteObject,
   RouterProvider,
 } from "react-router-dom";
-import { Login } from "./pages/Login";
-import { Signup } from "./pages/Signup";
-import { ForgotPassword } from "./pages/ForgotPassword";
-import { InvestorDiscovery } from "./components/InvestorDiscovery";
-
-export const routes: RouteObject[] = [
-  { path: "/", element: <Home /> },
-  { path: "/login", element: <Login /> },
-  { path: "/signup", element: <Signup /> },
-  { path: "/forgot-password", element: <ForgotPassword /> },
-  {
-    path: "/startup/dashboard",
-    element: <Placeholder title="Startup Dashboard" />,
-  },
-  { path: "/investor/portal", element: <InvestorDiscovery /> },
-];
-
-const router = createBrowserRouter(routes);
-
-export function App() {
-  return <RouterProvider router={router} />;
-import type { MouseEvent } from "react";
-import { BrowserRouter as Router, Routes, Route, Link, Outlet } from "react-router-dom";
 import { Login } from "./pages/Login";
 import { Signup } from "./pages/Signup";
 import { ForgotPassword } from "./pages/ForgotPassword";
@@ -118,58 +97,47 @@ function SiteFooter() {
   );
 }
 
+export const routes: RouteObject[] = [
+  {
+    element: <AppLayout />,
+    children: [
+      { path: "/", element: <Home /> },
+      { path: "/login", element: <Login /> },
+      { path: "/signup", element: <Signup /> },
+      { path: "/forgot-password", element: <ForgotPassword /> },
+      { path: "/recover-2fa", element: <TwoFactorRecoveryPage /> },
+      { path: "/settings/2fa/backup-codes", element: <TwoFactorBackupCodesPage /> },
+
+      // Startup routes
+      { path: "/startup/dashboard", element: <StartupDashboard /> },
+      { path: "/startup/report-revenue", element: <RevenueReportForm /> },
+      // Issue #199 – Inline document uploader (Offering Registration wizard)
+      { path: "/startup/offering-registration", element: <OfferingRegistrationDemo /> },
+      // Issue #247 – Governance proposal creation multi-step form
+      { path: "/startup/governance/proposals/create", element: <GovernanceProposalCreatePage /> },
+      // Issue #472 – Governance vote receipt with on-chain link
+      { path: "/startup/governance/vote-receipt", element: <GovernanceVoteReceiptDemo /> },
+
+      // Investor routes
+      { path: "/investor/portal", element: <InvestorDiscovery /> },
+      { path: "/investor/portfolio", element: <InvestorPortfolioSummary /> },
+      { path: "/investor/payouts", element: <PayoutSchedule /> },
+      // Issue #139 – Virtualized Ledger Table
+      { path: "/investor/ledger", element: <LedgerDemoPage /> },
+
+      // Admin routes
+      { path: "/admin/alerts", element: <AdminAlertsInbox /> },
+      { path: "/admin/scheduled-exports", element: <ScheduledExportsPage /> },
+
+      { path: "*", element: <Placeholder title="Page not found" /> },
+    ],
+  },
+];
+
 export function App() {
-  return (
-    <Router>
-      <Routes>
-        <Route element={<AppLayout />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/recover-2fa" element={<TwoFactorRecoveryPage />} />
-          <Route path="/settings/2fa/backup-codes" element={<TwoFactorBackupCodesPage />} />
-
-          {/* Startup routes */}
-          <Route
-            path="/startup/dashboard"
-            element={<StartupDashboard />}
-          />
-          <Route
-            path="/startup/report-revenue"
-            element={<RevenueReportForm />}
-          />
-          {/* Issue #199 – Inline document uploader (Offering Registration wizard) */}
-          <Route
-            path="/startup/offering-registration"
-            element={<OfferingRegistrationDemo />}
-          />
-          {/* Issue #247 – Governance proposal creation multi-step form */}
-          <Route
-            path="/startup/governance/proposals/create"
-            element={<GovernanceProposalCreatePage />}
-          />
-          {/* Issue #472 – Governance vote receipt with on-chain link */}
-          <Route
-            path="/startup/governance/vote-receipt"
-            element={<GovernanceVoteReceiptDemo />}
-          />
-
-          {/* Investor routes */}
-          <Route path="/investor/portal" element={<InvestorDiscovery />} />
-          <Route path="/investor/portfolio" element={<InvestorPortfolioSummary />} />
-          <Route path="/investor/payouts" element={<PayoutSchedule />} />
-          <Route path="*" element={<Placeholder title="Page not found" />} />
-          {/* Issue #139 – Virtualized Ledger Table */}
-          <Route path="/investor/ledger" element={<LedgerDemoPage />} />
-
-          {/* Admin routes */}
-          <Route path="/admin/alerts" element={<AdminAlertsInbox />} />
-          <Route path="/admin/scheduled-exports" element={<ScheduledExportsPage />} />
-        </Route>
-      </Routes>
-    </Router>
-  );
+  // Created lazily so the router picks up the current URL at mount time.
+  const [router] = useState(() => createBrowserRouter(routes));
+  return <RouterProvider router={router} />;
 }
 
 function AppLayout() {

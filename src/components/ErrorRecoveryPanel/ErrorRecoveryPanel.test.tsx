@@ -57,8 +57,7 @@ describe('ErrorRecoveryPanel', () => {
 
   it('removes item when discard is clicked', () => {
     render(<TestWrapper />);
-    const discardBtns = screen.getAllByText('Discard');
-    fireEvent.click(discardBtns[0]); // Discard Draft A
+    fireEvent.click(screen.getByRole('button', { name: 'Discard Failed to save Draft A' }));
     expect(screen.queryByText('Failed to save Draft A')).toBeNull();
     expect(screen.getByText('Failed to save Draft B')).toBeInTheDocument();
   });

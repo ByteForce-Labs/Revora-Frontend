@@ -5,7 +5,7 @@ export interface LocalizedTextProps {
   children: React.ReactNode;
   locale?: SupportedLocale | string;
   className?: string;
-  as?: "span" | "div";
+  as?: "span" | "div" | "p" | "h1" | "h2" | "h3";
   role?: string;
   id?: string;
   lang?: string;
@@ -24,12 +24,12 @@ export const LocalizedText = React.forwardRef<HTMLElement, LocalizedTextProps>(
     },
     ref,
   ) => {
-    const Tag = as as keyof JSX.IntrinsicElements;
+    const Tag = as as React.ElementType;
     const dir = locale ? (isRtlLocale(locale) ? "rtl" : "ltr") : "auto";
 
     return (
       <Tag
-        ref={ref as React.LegacyRef<HTMLElement>}
+        ref={ref}
         className={["localized-text", className].filter(Boolean).join(" ")}
         dir={dir}
         lang={lang ?? (locale as string | undefined)}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import { AccessibleChart } from './AccessibleChart';
 
 describe('AccessibleChart', () => {
@@ -18,11 +18,12 @@ describe('AccessibleChart', () => {
     const table = screen.getByRole('table', { name: 'Test Chart' });
     expect(table).toBeInTheDocument();
     
-    // Check table content
-    expect(screen.getByText('A')).toBeInTheDocument();
-    expect(screen.getByText('10')).toBeInTheDocument();
-    expect(screen.getByText('B')).toBeInTheDocument();
-    expect(screen.getByText('20')).toBeInTheDocument();
+    // Check table content (labels also appear in the chart, so scope to the table)
+    const cells = within(table);
+    expect(cells.getByText('A')).toBeInTheDocument();
+    expect(cells.getByText('10')).toBeInTheDocument();
+    expect(cells.getByText('B')).toBeInTheDocument();
+    expect(cells.getByText('20')).toBeInTheDocument();
   });
 
   it('handles empty data', () => {

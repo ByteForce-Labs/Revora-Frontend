@@ -203,7 +203,9 @@ export default function KycSelfieCapture({
         setCaptureError(null);
         const file = new File([blob], 'selfie.png', { type: 'image/png' });
         setCapturedFile(file);
-        setCapturedImage(URL.createObjectURL(blob));
+        const objectUrl = URL.createObjectURL(blob);
+        capturedImageRef.current = objectUrl;
+        setCapturedImage(objectUrl);
         setIsCapturing(false);
         stopStream();
       } else {

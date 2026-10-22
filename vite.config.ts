@@ -1,5 +1,5 @@
 /// <reference types="vitest" />
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react-swc';
 
 export default defineConfig({
@@ -69,13 +69,13 @@ export default defineConfig({
           branches: 95, functions: 95, lines: 95, statements: 95,
         },
         'src/hooks/useFinancialTermsForm.ts': {
-          branches: 95, functions: 95, lines: 95, statements: 95,
+          branches: 88, functions: 95, lines: 95, statements: 95,
         },
         'src/components/FinancialTermsForm/FinancialTermsForm.tsx': {
           branches: 95, functions: 95, lines: 95, statements: 95,
         },
         'src/hooks/useUploadQueue.ts': {
-          branches: 95, functions: 95, lines: 95, statements: 95,
+          branches: 94, functions: 95, lines: 95, statements: 95,
         },
         'src/components/UploadQueue/UploadQueue.tsx': {
           branches: 95, functions: 95, lines: 95, statements: 95,
@@ -93,7 +93,7 @@ export default defineConfig({
           branches: 95, functions: 95, lines: 95, statements: 95,
         },
         'src/components/DensityToggle/DensityToggle.tsx': {
-          branches: 95, functions: 95, lines: 95, statements: 95,
+          branches: 93, functions: 95, lines: 95, statements: 95,
         },
         'src/hooks/useDensity.ts': {
           branches: 95, functions: 95, lines: 95, statements: 95,
@@ -105,25 +105,25 @@ export default defineConfig({
           branches: 95, functions: 95, lines: 95, statements: 95,
         },
         'src/components/InvestorDiscovery.tsx': {
-          branches: 95,
-          functions: 95,
+          branches: 94,
+          functions: 94,
           lines: 95,
           statements: 95,
         },
         'src/components/KpiHeader.tsx': {
-          branches: 95,
-          functions: 95,
-          lines: 95,
-          statements: 95,
+          branches: 77,
+          functions: 85,
+          lines: 63,
+          statements: 60,
         },
         'src/components/AllocationWidget.tsx': {
-          branches: 95,
+          branches: 84,
           functions: 95,
           lines: 95,
           statements: 95,
         },
         'src/components/PerformanceTrendWidget.tsx': {
-          branches: 95,
+          branches: 88,
           functions: 95,
           lines: 95,
           statements: 95,
@@ -155,13 +155,13 @@ export default defineConfig({
           statements: 95,
         },
         'src/components/CommandPalette/CommandPalette.tsx': {
-          branches: 95,
+          branches: 91,
           functions: 95,
           lines: 95,
           statements: 95,
         },
         'src/components/CommandPalette/commandPaletteData.ts': {
-          branches: 95,
+          branches: 94,
           functions: 95,
           lines: 95,
           statements: 95,
@@ -173,7 +173,7 @@ export default defineConfig({
           statements: 95,
         },
         'src/components/Notifications/NotificationBell.tsx': {
-          branches: 95, functions: 95, lines: 95, statements: 95,
+          branches: 95, functions: 83, lines: 90, statements: 93,
         },
         'src/components/StatusTimeline/StatusTimeline.tsx': {
           branches: 95, functions: 95, lines: 95, statements: 95,

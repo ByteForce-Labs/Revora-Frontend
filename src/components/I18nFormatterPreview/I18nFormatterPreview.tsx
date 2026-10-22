@@ -417,8 +417,17 @@ export const I18nFormatterPreview: React.FC<I18nFormatterPreviewProps> = ({
           </thead>
           <tbody>
             {sampleRows.map((row) => {
-              const currentFormatted = row.formatValue(selectedLocale);
-              const defaultFormatted = row.formatValue(systemDefaultLocale);
+              // Intl throws a RangeError for malformed locale tags; fall back to
+              // the raw sample instead of crashing the whole preview.
+              const safeFormat = (loc: string) => {
+                try {
+                  return row.formatValue(loc);
+                } catch {
+                  return row.rawSample;
+                }
+              };
+              const currentFormatted = safeFormat(selectedLocale);
+              const defaultFormatted = safeFormat(systemDefaultLocale);
 
               return (
                 <tr key={row.id}>

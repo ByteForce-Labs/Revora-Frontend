@@ -216,7 +216,6 @@ describe('KycDocumentCapture', () => {
       mockGetUserMedia.mockRejectedValue(
         new DOMException('Permission denied', 'NotAllowedError'),
       );
-      mockGetUserMedia.mockResolvedValueOnce(createMockStream(trackStopSpy));
 
       render(<KycDocumentCapture />);
       fireEvent.click(screen.getByText('Enable Camera'));

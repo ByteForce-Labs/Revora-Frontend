@@ -69,7 +69,6 @@ describe("KycRejectionPanel — malformed reasons (#738)", () => {
     ["unknown code", "VENDOR_XYZ", "UNCLEAR", /Contact support: Needs clarification/i],
     ["empty code", "", "UNCLEAR", /Contact support: Needs clarification/i],
     ["whitespace-only code", "   ", "UNCLEAR", /Contact support: Needs clarification/i],
-    ["lowercase canonical code", "id blurry", "ID_BLURRY", /Re-upload ID: ID photo unclear/i],
   ])("normalises %s to a resolvable CTA", (_label, code, expectedCode, ctaName) => {
     renderPanel({ reasons: [{ id: "r", code }] });
 
@@ -80,6 +79,17 @@ describe("KycRejectionPanel — malformed reasons (#738)", () => {
       "href",
       "/support/kyc",
     );
+  });
+
+  it("normalises a lowercase canonical code to its corrective-action CTA", () => {
+    renderPanel({ reasons: [{ id: "r", code: "id blurry" }] });
+
+    const item = screen.getByTestId("kyc-rejection-item-r");
+    expect(item).toHaveAttribute("data-code", "ID_BLURRY");
+    // Non-support reasons expose a single corrective-action button instead of a support link.
+    expect(
+      within(item).getByRole("button", { name: /Re-upload ID: ID photo unclear/i }),
+    ).toBeInTheDocument();
   });
 
   it("falls back to UNCLEAR for a null code", () => {

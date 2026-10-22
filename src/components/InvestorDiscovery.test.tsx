@@ -250,14 +250,14 @@ describe('InvestorDiscovery – loaded state', () => {
     expect(screen.getByRole('searchbox', { name: /Search startup offerings/i })).toBeInTheDocument();
   });
 
-  it('funding progress bars have progressbar role and aria attributes', () => {
+  // Issue #668 replaced the funding progress bars with AccessibleChart, which
+  // exposes the raised/target figures through a labelled tabular fallback.
+  it('each offering exposes its funding progress as an accessible table', () => {
     renderLoaded();
-    const bars = screen.getAllByRole('progressbar');
-    expect(bars.length).toBeGreaterThan(0);
-    bars.forEach((bar) => {
-      expect(bar).toHaveAttribute('aria-valuenow');
-      expect(bar).toHaveAttribute('aria-valuemin', '0');
-      expect(bar).toHaveAttribute('aria-valuemax', '100');
+    MOCK_OFFERINGS.forEach((offering) => {
+      const table = screen.getByRole('table', { name: `${offering.name} Funding Progress` });
+      expect(within(table).getByText('Raised')).toBeInTheDocument();
+      expect(within(table).getByText('Target')).toBeInTheDocument();
     });
   });
 

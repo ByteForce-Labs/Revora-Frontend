@@ -106,7 +106,7 @@ function formatRangeLabel(start: Date, end: Date, zoom: ZoomLevel): string {
       ? { month: 'short', day: 'numeric', year: 'numeric' }
       : zoom === 'month'
         ? { month: 'long', year: 'numeric' }
-        : { quarter: 'numeric', year: 'numeric' };
+        : { year: 'numeric' };
 
   const startStr = new Intl.DateTimeFormat('en-US', opts).format(start);
   const endStr = new Intl.DateTimeFormat('en-US', opts).format(end);

@@ -81,10 +81,11 @@ describe("NetworkSwitcherContext", () => {
 			expect(ctx.appChainId).toBe(DEFAULT_APP_CHAIN_ID);
 			expect(ctx.appChainId).toBe(137);
 			expect(ctx.walletName).toBe("MetaMask");
-			expect(ctx.isWalletConnected).toBe(true);
+			// Without an explicit connected chain the wallet defaults to disconnected (#982)
+			expect(ctx.isWalletConnected).toBe(false);
 			expect(ctx.isModalOpen).toBe(false);
 			expect(ctx.isSwitching).toBe(false);
-			expect(ctx.isMismatch).toBe(true); // 1 !== 137 while connected
+			expect(ctx.isMismatch).toBe(false); // no mismatch until a wallet reports a chain
 
 			// Derived chain metadata
 			expect(ctx.connectedChain).toEqual(getChainMetadata(1));

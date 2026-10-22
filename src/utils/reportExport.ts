@@ -430,17 +430,21 @@ export function toPdfBytes(rows: string[][]): Uint8Array {
     `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pageWidth} 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>`
   );
   objects.push("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>");
-  objects.push(`<< /Length ${content.length} >>\nstream\n${content}\nendstream`);
+  // /Length and xref offsets are byte counts of the UTF-8 encoded document.
+  objects.push(`<< /Length ${encoder.encode(content).length} >>\nstream\n${content}\nendstream`);
 
   let pdf =
     "%PDF-1.4\n";
   const offsets: number[] = [];
+  let byteLength = encoder.encode(pdf).length;
   objects.forEach((body, index) => {
-    offsets.push(pdf.length);
-    pdf += `${index + 1} 0 obj\n${body}\nendobj\n`;
+    offsets.push(byteLength);
+    const chunk = `${index + 1} 0 obj\n${body}\nendobj\n`;
+    pdf += chunk;
+    byteLength += encoder.encode(chunk).length;
   });
 
-  const xrefOffset = pdf.length;
+  const xrefOffset = byteLength;
   pdf += `xref\n0 ${objects.length + 1}\n`;
   pdf += "0000000000 65535 f \n";
   offsets.forEach((offset) => {

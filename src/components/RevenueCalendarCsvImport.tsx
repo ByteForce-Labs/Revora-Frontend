@@ -505,10 +505,12 @@ function ConfirmStep({
   rows,
   onConfirm,
   isCommitting,
+  committed,
 }: {
   rows: PreviewRow[];
   onConfirm: () => void;
   isCommitting: boolean;
+  committed: boolean;
 }) {
   const conflictCount = rows.filter((r) => r.conflictReason).length;
   const cleanCount = rows.length - conflictCount;
@@ -536,15 +538,22 @@ function ConfirmStep({
         </div>
       )}
 
-      <Button
-        variant="primary"
-        onClick={onConfirm}
-        className="rcci-confirm-btn"
-        disabled={isCommitting}
-      >
-        <CheckCircle2 size={16} aria-hidden="true" />
-        Confirm Import
-      </Button>
+      {committed ? (
+        <div className="rcci-confirm-done" role="status" aria-live="polite">
+          <CheckCircle2 size={16} aria-hidden="true" />
+          Imported {cleanCount} row{cleanCount !== 1 ? 's' : ''}
+        </div>
+      ) : (
+        <Button
+          variant="primary"
+          onClick={onConfirm}
+          className="rcci-confirm-btn"
+          disabled={isCommitting}
+        >
+          <CheckCircle2 size={16} aria-hidden="true" />
+          Confirm Import
+        </Button>
+      )}
     </div>
   );
 }
@@ -563,6 +572,7 @@ export const RevenueCalendarCsvImport: React.FC<RevenueCalendarCsvImportProps> =
   const [previewRows, setPreviewRows] = useState<PreviewRow[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [isCommitting, setIsCommitting] = useState(false);
+  const [committed, setCommitted] = useState(false);
   const committedRef = useRef(false);
 
   const stepIdx = STEPS.indexOf(step);
@@ -591,6 +601,8 @@ export const RevenueCalendarCsvImport: React.FC<RevenueCalendarCsvImportProps> =
     setIsCommitting(true);
     const cleanRows = previewRows.filter((r) => !r.conflictReason);
     onImport?.(cleanRows);
+    setCommitted(true);
+    setIsCommitting(false);
   }, [previewRows, onImport]);
 
   const handleBack = useCallback(() => {
@@ -632,6 +644,7 @@ export const RevenueCalendarCsvImport: React.FC<RevenueCalendarCsvImportProps> =
             rows={previewRows}
             onConfirm={commitImport}
             isCommitting={isCommitting}
+            committed={committed}
           />
         )}
       </div>

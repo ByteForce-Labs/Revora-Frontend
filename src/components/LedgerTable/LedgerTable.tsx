@@ -22,7 +22,7 @@ export interface Column<T> {
   render: (row: T) => React.ReactNode;
 }
 
-export interface LedgerDrawerConfig {
+export interface LedgerDrawerConfig<T = unknown> {
   /** URL query param used for the deep-link permalink. When set, opening a row's
    *  detail drawer writes `?param=<rowKey>` via history.replaceState and, on
    *  mount/popstate, restores the drawer for the matching row. */
@@ -50,7 +50,7 @@ export interface LedgerTableProps<T> {
   /** How row detail is revealed. Defaults to 'inline' (legacy expanding panel). */
   detailMode?: DetailMode;
   /** Configuration for the row-detail side drawer (used when detailMode='drawer'). */
-  drawer?: LedgerDrawerConfig;
+  drawer?: LedgerDrawerConfig<T>;
 }
 
 const DENSITY_CLASS: Record<DensityMode, string> = {
@@ -630,8 +630,12 @@ function LedgerTable<T>({
         aria-rowcount={flattenedData.length}
       >
         {stickyHeader && (
-          <div className="lt-header" role="row" aria-rowindex={0}>
-            {rowDetail && <div className="lt-cell lt-cell--detail" role="columnheader" aria-label="Detail" />}
+          <div className="lt-header" role="row">
+            {rowDetail && (
+              <div className="lt-cell lt-cell--detail" role="columnheader" aria-label="Detail">
+                <span className="sr-only">Detail</span>
+              </div>
+            )}
             {filteredColumns.map((col) => (
               <div
                 key={col.key}
@@ -690,7 +694,7 @@ function LedgerTable<T>({
                   onClick={() => toggleGroup(item.key)}
                   tabIndex={-1}
                 >
-                  <div className="lt-cell lt-cell--group-header" style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div className="lt-cell lt-cell--group-header" role="gridcell" style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <button
                       type="button"
                       className="lt-group-toggle"
@@ -733,6 +737,7 @@ function LedgerTable<T>({
                   {rowDetail && (
                     <div
                       className={`lt-cell lt-cell--detail ${isRowFocused && focusedColumnIndex === 0 ? 'lt-cell--focused' : ''}`}
+                      role="gridcell"
                       onClick={(e) => handleCellClick(row, globalIndex, 0, e)}
                     >
                       <button

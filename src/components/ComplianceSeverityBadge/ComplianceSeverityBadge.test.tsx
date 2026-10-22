@@ -125,7 +125,7 @@ describe('ComplianceSeverityLegend', () => {
 
     expect(screen.getByText(/Informational notice/i)).toBeInTheDocument();
     expect(screen.getByText(/Attention recommended/i)).toBeInTheDocument();
-    expect(screen.getByText(/Action required/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Action required/i).length).toBeGreaterThan(0);
   });
 
   it('has no axe violations', async () => {

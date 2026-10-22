@@ -53,6 +53,8 @@ import { TERMINOLOGY } from "../constants/terminology";
 import { Button } from "./Button";
 import {
   RevenueReportingCalendarProps,
+  RevenueReport,
+  DetailsPanelProps,
   DayCellData,
   ReportStatus,
   REPORT_STATUS_LABELS,

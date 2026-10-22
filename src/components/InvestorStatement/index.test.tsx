@@ -30,7 +30,7 @@ describe("InvestorStatement public exports", () => {
       "Investor Statement for Jordan Lee — H1 2025"
     );
     expect(screen.getByText("Northstar Fund")).toBeInTheDocument();
-    expect(screen.getByText("REV-1001")).toBeInTheDocument();
+    expect(screen.getAllByText("REV-1001").length).toBeGreaterThan(0);
   });
 
   it("throws a deterministic range error for an invalid currency code", () => {

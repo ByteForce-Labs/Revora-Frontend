@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DelegationConfirmDialog, RevokeConfirmDialog } from './DelegationDialogs';
 
 /**
@@ -15,9 +15,15 @@ import { DelegationConfirmDialog, RevokeConfirmDialog } from './DelegationDialog
 describe('DelegationConfirmDialog / RevokeConfirmDialog', () => {
   // jsdom does not implement the <dialog> modal methods; the component calls
   // them from a useEffect when `isOpen` changes.
-  beforeAll(() => {
-    HTMLDialogElement.prototype.showModal = vi.fn();
-    HTMLDialogElement.prototype.close = vi.fn();
+  // The stubs mirror the native behaviour of toggling the `open` attribute so
+  // the dialog contents stay in the accessibility tree.
+  beforeEach(() => {
+    HTMLDialogElement.prototype.showModal = vi.fn(function (this: HTMLDialogElement) {
+      this.setAttribute('open', '');
+    });
+    HTMLDialogElement.prototype.close = vi.fn(function (this: HTMLDialogElement) {
+      this.removeAttribute('open');
+    });
   });
 
   afterEach(() => {

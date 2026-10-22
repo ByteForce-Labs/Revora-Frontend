@@ -102,6 +102,7 @@ function DualAxisChartView({
               onMouseEnter={() => setHoverIdx(i)}
               onMouseLeave={() => setHoverIdx(null)}
               className="transition-opacity duration-200"
+              role="img"
               aria-label={`${d.period} Payout: ${formatCurrency(d.payout, payoutCurrency)}`}
               tabIndex={0}
               onFocus={() => setHoverIdx(i)}

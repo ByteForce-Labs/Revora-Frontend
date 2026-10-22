@@ -266,6 +266,17 @@ function AppealFormStep({
       {/* Attachments */}
       <div className="caf-field">
         <label className="caf-label">Supporting documents (optional)</label>
+        {/* Kept outside the role="button" dropzone to avoid nested interactive controls */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          accept={ACCEPTED_FILE_TYPES}
+          className="caf-file-input"
+          onChange={(e) => handleAddFiles(e.target.files)}
+          aria-hidden="true"
+          tabIndex={-1}
+        />
         <div
           className="caf-dropzone"
           role="button"
@@ -281,16 +292,6 @@ function AppealFormStep({
           onDrop={handleDrop}
           onDragOver={(e) => e.preventDefault()}
         >
-          <input
-            ref={fileInputRef}
-            type="file"
-            multiple
-            accept={ACCEPTED_FILE_TYPES}
-            className="caf-file-input"
-            onChange={(e) => handleAddFiles(e.target.files)}
-            aria-hidden="true"
-            tabIndex={-1}
-          />
           <Upload size={20} aria-hidden="true" />
           <span>Drop files here or click to upload</span>
           <span className="caf-hint">PDF, DOC, JPG, PNG, TXT (up to 10 MB each)</span>

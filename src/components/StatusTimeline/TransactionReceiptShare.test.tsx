@@ -38,7 +38,7 @@ describe('TransactionReceiptShare', () => {
     
     // Mock ClipboardItem
     // @ts-ignore
-    global.ClipboardItem = vi.fn().mockImplementation((data) => data);
+    global.ClipboardItem = vi.fn(function (data: unknown) { return data; });
     global.alert = vi.fn();
     global.URL.createObjectURL = vi.fn().mockReturnValue('blob:mock');
   });

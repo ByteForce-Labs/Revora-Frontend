@@ -107,7 +107,7 @@ describe('GovernanceProposalDetail', () => {
       render(<GovernanceProposalDetail proposal={createProposal()} />);
 
       expect(screen.getByText('2.5M')).toBeInTheDocument();
-      expect(screen.getByText('4M')).toBeInTheDocument();
+      expect(screen.getByText(/\/ 4\.0M/)).toBeInTheDocument();
     });
   });
 
@@ -198,9 +198,9 @@ describe('GovernanceProposalDetail', () => {
     it('shows percentage and value in legend', () => {
       render(<GovernanceProposalDetail proposal={createProposal()} />);
 
-      expect(screen.getByText('80.0%')).toBeInTheDocument(); // for: 2M/2.5M
-      expect(screen.getByText('18.0%')).toBeInTheDocument(); // against
-      expect(screen.getByText('2,000,000')).toBeInTheDocument(); // for value
+      expect(screen.getAllByText('80.0%').length).toBeGreaterThan(0); // for: 2M/2.5M
+      expect(screen.getAllByText('18.0%').length).toBeGreaterThan(0); // against
+      expect(screen.getAllByText('2,000,000').length).toBeGreaterThan(0); // for value
     });
   });
 
@@ -238,8 +238,8 @@ describe('GovernanceProposalDetail', () => {
       });
       render(<GovernanceProposalDetail proposal={proposal} />);
 
-      expect(screen.getByText('40.0%')).toBeInTheDocument(); // for
-      expect(screen.getByText('40.0%')).toBeInTheDocument(); // against
+      expect(screen.getAllByText('40.0%').length).toBeGreaterThanOrEqual(2); // for
+      expect(screen.getAllByText('40.0%').length).toBeGreaterThanOrEqual(2); // against
     });
 
     it('accepts custom className', () => {

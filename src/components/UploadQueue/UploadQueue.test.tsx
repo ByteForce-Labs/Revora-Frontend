@@ -317,7 +317,7 @@ describe('UploadQueue – summary bar', () => {
       errorCount: 1,
       overallProgress: 50,
     });
-    expect(screen.getByText(/1 failed/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/1 failed/i).length).toBeGreaterThan(0);
   });
 
   it('shows uploading copy when uploads are in progress', () => {
