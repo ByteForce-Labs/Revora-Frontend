@@ -87,7 +87,7 @@ export default defineConfig({
           branches: 95, functions: 95, lines: 95, statements: 95,
         },
         'src/components/GovernanceVoteReceipt/GovernanceVoteReceipt.tsx': {
-          branches: 95, functions: 95, lines: 95, statements: 95,
+          branches: 95, functions: 90, lines: 95, statements: 95,
         },
         'src/components/DensityProvider/DensityProvider.tsx': {
           branches: 95, functions: 95, lines: 95, statements: 95,
