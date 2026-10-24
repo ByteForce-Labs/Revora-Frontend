@@ -134,70 +134,113 @@ export interface FieldValidationResult {
 
 /* ─── Number parsing ────────────────────────────────────────────────────── */
 
+function getLocaleSeparators(locale: string): { decimal: string; group: string } {
+  try {
+    const parts = new Intl.NumberFormat(locale).formatToParts(1000.1);
+    let decimal = '.';
+    let group = ',';
+    for (const part of parts) {
+      if (part.type === 'decimal') decimal = part.value;
+      if (part.type === 'group') group = part.value;
+    }
+    return { decimal, group };
+  } catch {
+    return { decimal: '.', group: ',' };
+  }
+}
+
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 /**
  * Parses a locale-formatted number string into a JS number.
  *
  * Handles:
- * - Thousands separators: commas (en-US), periods (de-DE), spaces (fr-FR)
+ * - Thousands separators: commas (en-US), periods (de-DE), spaces/NBSP (fr-FR)
  * - Decimal separators: period (en-US), comma (de-DE)
  * - Leading/trailing whitespace
  * - Negative values → returns null (financial terms must be positive)
  * - Empty / non-numeric strings → returns null
  */
-export function parseLocaleNumber(raw: string): number | null {
+export function parseLocaleNumber(raw: string, locale?: string): number | null {
   const trimmed = raw.trim();
   if (trimmed === '') return null;
 
   // Reject explicit negatives — all financial terms must be positive
   if (trimmed.startsWith('-')) return null;
 
-  // Check for invalid characters early (currency symbols, letters, %, etc)
-  // Allow: digits, comma, period, optional leading minus (already rejected above)
-  if (!/^[\d,.]*$/.test(trimmed)) return null;
+  // Allow digits, separators (comma, period, space, NBSP, thin space), and locale-derived
+  const normalizedWhitespace = trimmed.replace(/[\s\u00A0\u202F]/g, ' ');
+  if (!/^[\d,.\s\u00A0\u202F]*$/.test(trimmed)) return null;
 
-  let normalised = trimmed;
+  let working = normalizedWhitespace;
 
-  const dotCount = (trimmed.match(/\./g) ?? []).length;
-  const commaCount = (trimmed.match(/,/g) ?? []).length;
+  if (locale) {
+    const { decimal, group } = getLocaleSeparators(locale);
+    const groupRe = new RegExp(escapeRegExp(group === ' ' ? ' ' : group), 'g');
+    working = working.replace(groupRe, '');
+    if (group === ' ') {
+      working = working.replace(/\s+/g, '');
+    }
+    if (decimal !== '.') {
+      const decRe = new RegExp(escapeRegExp(decimal), 'g');
+      working = working.replace(decRe, '.');
+    }
+    working = working.replace(/\s+/g, '');
+  } else {
+    const dotCount = (working.match(/\./g) ?? []).length;
+    const commaCount = (working.match(/,/g) ?? []).length;
 
-  if (dotCount > 0 && commaCount > 0) {
-    // Both present — whichever comes last is the decimal separator
-    const lastDot = trimmed.lastIndexOf('.');
-    const lastComma = trimmed.lastIndexOf(',');
-    if (lastComma > lastDot) {
-      // European format: 1.234,56
-      normalised = trimmed.replace(/\./g, '').replace(',', '.');
-    } else {
-      // US format with comma thousands: 1,234.56
-      normalised = trimmed.replace(/,/g, '');
+    if (dotCount > 0 && commaCount > 0) {
+      // Both present — whichever comes last is the decimal separator
+      const lastDot = working.lastIndexOf('.');
+      const lastComma = working.lastIndexOf(',');
+      if (lastComma > lastDot) {
+        // European format: 1.234,56
+        working = working.replace(/\./g, '').replace(',', '.');
+      } else {
+        // US format with comma thousands: 1,234.56
+        working = working.replace(/,/g, '');
+      }
+    } else if (commaCount === 1) {
+      // Single comma — decimal separator if followed by 1-3 digits at end (or if no other pattern)
+      if (/,(\d{1,3})$/.test(working)) {
+        // Check if it's likely thousands (grouped in threes) vs decimal
+        const before = working.slice(0, working.lastIndexOf(','));
+        if (before.includes(',') || before.includes('.')) {
+          working = working.replace(/,/g, '');
+        } else if ((before.match(/\d/g) || []).length % 3 === 0 && before.length > 0 && before.replace(/[^0-9]/g, '').length > 0 && !/,\d{1,2}$/.test(working)) {
+          // Could be thousands in some locales, but default to decimal only for 1-2 digits? Keep original heuristic but be more careful
+          working = working.replace(',', '.');
+        } else if (/,\d{3}$/.test(working)) {
+          // Ambiguous case - treat as thousands if grouped
+          working = working.replace(/,/g, '');
+        } else {
+          working = working.replace(',', '.');
+        }
+      } else {
+        working = working.replace(/,/g, '');
+      }
+    } else if (dotCount === 1) {
+      // Single dot — could be decimal or thousands separator
+      if (/\.\d{3}$/.test(working)) {
+        working = working.replace(/\./g, '');
+      }
+      // else: single dot as decimal — pass through as-is
+    } else if (dotCount > 1) {
+      // Multiple dots — thousands separators (e.g. "1.000.000")
+      working = working.replace(/\./g, '');
     }
-  } else if (commaCount === 1) {
-    // Single comma — decimal separator if followed by 1-2 digits at end
-    if (/,\d{1,2}$/.test(trimmed)) {
-      normalised = trimmed.replace(',', '.');
-    } else {
-      // Thousands separator (e.g. "1,000")
-      normalised = trimmed.replace(/,/g, '');
-    }
-  } else if (dotCount === 1) {
-    // Single dot — could be decimal or thousands separator
-    // If followed by exactly 3 digits at end, it's thousands separator (e.g., "1.000")
-    if (/\.\d{3}$/.test(trimmed)) {
-      normalised = trimmed.replace(/\./g, '');
-    }
-    // else: single dot as decimal — pass through as-is
-  } else if (dotCount > 1) {
-    // Multiple dots — thousands separators (e.g. "1.000.000")
-    normalised = trimmed.replace(/\./g, '');
+
+    working = working.replace(/[^\d.]/g, '');
   }
-  // else: no separators — pass through as-is
 
-  // Strip any remaining non-numeric characters except the decimal point
-  normalised = normalised.replace(/[^\d.]/g, '');
+  working = working.replace(/[^\d.]/g, '');
 
-  if (normalised === '' || normalised === '.') return null;
+  if (working === '' || working === '.') return null;
 
-  const value = parseFloat(normalised);
+  const value = parseFloat(working);
   return isNaN(value) ? null : value;
 }
 
@@ -248,6 +291,30 @@ export function validateField(
       message: `${c.label} cannot exceed ${formatConstraint(c.max, c.unit)}. Enter a value of ${formatConstraint(c.max, c.unit)} or lower.`,
       numericValue: num,
     };
+  }
+
+  if (typeof c.step === 'number' && c.step > 0) {
+    const epsilon = 1e-8;
+    if (c.step === 1) {
+      // Allow values that are integers (including .0)
+      if (Math.abs(num - Math.round(num)) > 1e-6) {
+        return {
+          severity: 'error',
+          message: `${c.label} must be in increments of ${c.step} ${c.unit}. Enter a value like ${c.min}.`,
+          numericValue: num,
+        };
+      }
+    } else {
+      const quotient = num / c.step;
+      const qRounded = Math.round(quotient);
+      if (Math.abs(quotient - qRounded) > epsilon) {
+        return {
+          severity: 'error',
+          message: `${c.label} must be in increments of ${c.step} ${c.unit}. Enter a value like ${c.min}.`,
+          numericValue: num,
+        };
+      }
+    }
   }
 
   if (c.guardrailLow !== null && num < c.guardrailLow && c.guardrailLowMsg !== null) {
@@ -307,10 +374,11 @@ export interface FormValidationSummary {
 
 export function validateFinancialTermsForm(
   values: FinancialTermsValues,
+  locale?: string,
 ): FormValidationSummary {
   const fields = (Object.keys(FIELD_CONSTRAINTS) as FinancialTermsField[]).reduce(
     (acc, field) => {
-      acc[field] = validateField(field, values[field]);
+      acc[field] = validateField(field, values[field], locale);
       return acc;
     },
     {} as Record<FinancialTermsField, FieldValidationResult>,

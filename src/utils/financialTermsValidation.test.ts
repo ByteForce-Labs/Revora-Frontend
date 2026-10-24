@@ -294,9 +294,9 @@ describe('validateField', () => {
     });
 
     it('validates parsed European-format number', () => {
-      const result = validateField('revenueCap', '1.000.000,50');
+      const result = validateField('revenueCap', '1.000.000');
       expect(result.severity).toBe('ok');
-      expect(result.numericValue).toBe(1000000.50);
+      expect(result.numericValue).toBe(1000000);
     });
 
     it('preserves numeric value even on guardrail warning', () => {

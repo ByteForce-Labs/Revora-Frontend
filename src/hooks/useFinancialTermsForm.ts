@@ -106,17 +106,17 @@ export interface UseFinancialTermsFormReturn {
 
 /* ─── Hook ──────────────────────────────────────────────────────────────── */
 
-export function useFinancialTermsForm(): UseFinancialTermsFormReturn {
+export function useFinancialTermsForm(locale?: string): UseFinancialTermsFormReturn {
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  const formSummary = validateFinancialTermsForm(state.values);
+  const formSummary = validateFinancialTermsForm(state.values, locale);
 
   const getFieldValidation = useCallback(
     (field: FinancialTermsField): FieldValidationResult | null => {
       if (!state.touched[field] && !state.submitAttempted) return null;
-      return validateField(field, state.values[field]);
+      return validateField(field, state.values[field], locale);
     },
-    [state.touched, state.submitAttempted, state.values],
+    [state.touched, state.submitAttempted, state.values, locale],
   );
 
   const handleChange = useCallback((field: FinancialTermsField, value: string) => {
@@ -129,8 +129,8 @@ export function useFinancialTermsForm(): UseFinancialTermsFormReturn {
 
   const handleSubmit = useCallback((): FormValidationSummary => {
     dispatch({ type: 'SUBMIT_ATTEMPT' });
-    return validateFinancialTermsForm(state.values);
-  }, [state.values]);
+    return validateFinancialTermsForm(state.values, locale);
+  }, [state.values, locale]);
 
   const reset = useCallback(() => {
     dispatch({ type: 'RESET' });
