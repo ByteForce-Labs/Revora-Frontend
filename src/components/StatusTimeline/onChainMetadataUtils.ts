@@ -2,6 +2,8 @@
  * Formatting helpers for on-chain status badge metadata (Issue #256).
  */
 
+import { APP_STELLAR_NETWORK } from '../../constants/stellar';
+
 export const DEFAULT_HASH_HEAD = 6;
 export const DEFAULT_HASH_TAIL = 4;
 
@@ -57,7 +59,7 @@ export type StellarExplorerNetwork = 'testnet' | 'public';
 
 export function buildStellarExplorerTxUrl(
   transactionHash: string,
-  network: StellarExplorerNetwork = 'public',
+  network: StellarExplorerNetwork = APP_STELLAR_NETWORK,
 ): string {
   const hash = transactionHash.trim();
   return `https://stellar.expert/explorer/${network}/tx/${encodeURIComponent(hash)}`;
@@ -73,5 +75,5 @@ export function resolveExplorerUrl(
   if (metadata.explorerUrl?.trim()) return metadata.explorerUrl.trim();
   const hash = metadata.transactionHash?.trim();
   if (!hash) return undefined;
-  return buildStellarExplorerTxUrl(hash, metadata.network ?? 'public');
+  return buildStellarExplorerTxUrl(hash, metadata.network ?? APP_STELLAR_NETWORK);
 }

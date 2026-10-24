@@ -78,15 +78,21 @@ describe('formatTimeSince', () => {
 });
 
 describe('buildStellarExplorerTxUrl', () => {
-  it('builds public network URL', () => {
+  it('builds testnet network URL by default', () => {
     expect(buildStellarExplorerTxUrl('abc123')).toBe(
-      'https://stellar.expert/explorer/public/tx/abc123',
+      'https://stellar.expert/explorer/testnet/tx/abc123',
     );
   });
 
   it('encodes hash segments', () => {
     expect(buildStellarExplorerTxUrl('a/b')).toBe(
-      'https://stellar.expert/explorer/public/tx/a%2Fb',
+      'https://stellar.expert/explorer/testnet/tx/a%2Fb',
+    );
+  });
+
+  it('builds public network URL when explicitly specified', () => {
+    expect(buildStellarExplorerTxUrl('abc123', 'public')).toBe(
+      'https://stellar.expert/explorer/public/tx/abc123',
     );
   });
 });

@@ -122,3 +122,7 @@ export function buildStellarLabUrl(contractId: string = CONTRACT_ID): string {
 export function buildTransactionExplorerUrl(txHash: string): string {
   return `${EXPLORER_BASE}/tx/${txHash}`;
 }
+
+export type AppStellarNetwork = 'testnet' | 'public';
+export const APP_STELLAR_NETWORK: AppStellarNetwork =
+  NETWORK === 'PUBLIC' ? 'public' : 'testnet';
